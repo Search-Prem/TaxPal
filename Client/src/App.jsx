@@ -1,43 +1,81 @@
-import { Routes, Route, Link, Navigate } from 'react-router-dom'
-//import Home from "./pages/Home";
-import Login from './pages/Login.jsx'
-import Register from './pages/Register.jsx'
-import Forgot from './pages/Forgot.jsx'
-import Reset from './pages/Reset.jsx'
-import Dashboard from './pages/Dashboard.jsx'
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Forgot from "./pages/Forgot.jsx";
+import Reset from "./pages/Reset.jsx";
+import Features from "./pages/Features.jsx";
+import Pricing from "./pages/Pricing.jsx";
+import Support from "./pages/Support.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-
-
+// ✅ Navbar Component
 function Navbar() {
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("token"); // check if token exists
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // clear token
+    navigate("/"); // back to login
+  };
+
   return (
     <div className="w-full border-b bg-white">
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white">🧮</span>
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white">
+            🧮
+          </span>
           <span className="text-lg font-semibold">TaxPal</span>
         </Link>
+
         <div className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-          <a href="#" className="hover:text-gray-900">Features</a>
-          <a href="#" className="hover:text-gray-900">Pricing</a>
-          <a href="#" className="hover:text-gray-900">Support</a>
+          <Link to="/features" className="hover:text-gray-900">
+            Features
+          </Link>
+          <Link to="/pricing" className="hover:text-gray-900">
+            Pricing
+          </Link>
+          <Link to="/support" className="hover:text-gray-900">
+            Support
+          </Link>
+
+          {/* ✅ Only show Logout after login */}
+          {isLoggedIn && (
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
+// ✅ Main App Component
 export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <Routes>    {/* Show Home.jsx */}
-  <Route path="/" element={<Login />} />
-  <Route path="/register" element={<Register />} />
-  <Route path="/forgot" element={<Forgot />} />
-  <Route path="/reset" element={<Reset />} />
-  <Route path="/dashboard" element={<Dashboard />} />
-</Routes>
 
+      {/* Routes */}
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot" element={<Forgot />} />
+        <Route path="/reset" element={<Reset />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/features" element={<Features />} />  
+        <Route path="/pricing" element={<Pricing />} /> 
+        <Route path="/support" element={<Support />} />
+      </Routes>
+
+      {/* Toast Notifications */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
-  )
+  );
 }

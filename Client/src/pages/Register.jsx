@@ -1,48 +1,30 @@
+// src/pages/Register.jsx
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import Input from "../components/Input.jsx";
-import Button from "../components/Button.jsx";
 import { toast } from "react-toastify";
-
-const countries = [
-  "United States",
-  "United Kingdom",
-  "India",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "Japan",
-  "China",
-  "Brazil",
-];
-
-const pwRegex =
-  /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Register() {
-  const nav = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    country: "",
-    income: "",
-  });
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [country, setCountry] = useState("");
+  const [income, setIncome] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // generic change handler
-  const change = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const navigate = useNavigate();
 
-  const submit = async (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
 
-    if (!pwRegex.test(form.password)) {
-      return toast.error(
-        "Password must have 1 uppercase, 1 number, 1 special char, min 8 chars"
-      );
+    if (password.length < 8) {
+      return toast.error("Password must be at least 8 characters");
+    }
+    if (password !== confirmPassword) {
+      return toast.error("Passwords do not match");
     }
 
     setLoading(true);
@@ -50,14 +32,20 @@ export default function Register() {
       const res = await fetch("http://localhost:5001/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          name: username,
+          email,
+          password,
+          country,
+          income,
+        }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Registration failed");
 
-      toast.success("Registered! Redirecting to login...");
-      setTimeout(() => nav("/"), 1500);
+      toast.success("Account created — redirecting to login...");
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -66,112 +54,144 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-gray-200 p-8">
-          <h1 className="text-2xl font-semibold text-center">Create Account</h1>
-          <p className="text-gray-600 mt-1 text-center">
-            Join TaxPal for professional tax management
-          </p>
+    <main className="min-h-[calc(100vh-64px)] grid place-items-center">
+      <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-2xl">
+        <h1 className="text-2xl font-semibold text-center mb-2">
+          Create account
+        </h1>
+        <p className="text-center text-gray-500 mb-6">
+          Start using TaxPal today
+        </p>
 
-          <form className="mt-6 flex flex-col gap-4" onSubmit={submit}>
-            <Input
-              label="Full Name"
-              placeholder="Enter your full name"
-              name="name"
-              value={form.name}
-              onChange={change}
-            />
-
-            <Input
-              label="Email Address"
-              type="email"
-              placeholder="Enter your email"
-              name="email"
-              value={form.email}
-              onChange={change}
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              placeholder="Create a password"
-              name="password"
-              value={form.password}
-              onChange={change}
-            />
-            <p className="text-xs text-gray-500 -mt-2">
-              Min 8 chars, 1 uppercase, 1 number, 1 special character.
-            </p>
-
-            <label className="block text-sm mb-1">Country</label>
-            <select
-              name="country"
-              value={form.country}
-              onChange={change}
+        <form className="space-y-4" onSubmit={onSubmit}>
+          {/* Username */}
+          <div>
+            <label className="block text-sm mb-1">Username</label>
+            <input
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="" disabled>
-                -- Select your country --
-              </option>
-              {countries.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            />
+          </div>
 
-            <label className="block text-sm mb-1">Income bracket</label>
-            <select
-              name="income"
-              value={form.income}
-              onChange={change}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="" disabled>
-                -- Select your income bracket --
-              </option>
-              <option value="0-25k">0 - 25,000</option>
-              <option value="25k-50k">25,000 - 50,000</option>
-              <option value="50k-100k">50,000 - 100,000</option>
-              <option value="100k-200k">100,000 - 200,000</option>
-              <option value="200k+">200,000+</option>
-            </select>
+          {/* Email */}
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <input
+              type="email"
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className="md:col-span-2 flex items-start gap-3 mt-2">
+          {/* Password */}
+          <div>
+            <label className="block text-sm mb-1">Password</label>
+            <div className="relative">
               <input
-                type="checkbox"
-                className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                type={showPass ? "text" : "password"}
+                className="w-full px-4 py-2 border rounded-lg pr-10 focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <p className="text-sm text-gray-600">
-                I agree to the{" "}
-                <a href="#" className="text-blue-600">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="#" className="text-blue-600">
-                  Privacy Policy
-                </a>
-              </p>
+              <button
+                type="button"
+                className="absolute right-3 top-2.5 text-gray-500"
+                onClick={() => setShowPass(!showPass)}
+              >
+                {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+          </div>
 
-            <div className="mt-2">
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Account"}
-              </Button>
+          {/* Confirm Password */}
+          <div>
+            <label className="block text-sm mb-1">Confirm Password</label>
+            <div className="relative">
+              <input
+                type={showConfirmPass ? "text" : "password"}
+                className="w-full px-4 py-2 border rounded-lg pr-10 focus:ring-2 focus:ring-blue-500"
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-2.5 text-gray-500"
+                onClick={() => setShowConfirmPass(!showConfirmPass)}
+              >
+                {showConfirmPass ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
-          </form>
+          </div>
 
-          <p className="text-sm text-gray-600 mt-6 text-center">
-            Already have an account?{" "}
-            <Link className="text-blue-600" to="/">
-              Sign In
-            </Link>
-          </p>
+          {/* Country */}
+          <div>
+            <label className="block text-sm mb-1">Select your country</label>
+            <select
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+            >
+              <option value="">-- Choose --</option>
+              <option value="United States">United States</option>
+              <option value="India">India</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="Germany">Germany</option>
+              <option value="France">France</option>
+              <option value="Japan">Japan</option>
+              <option value="Brazil">Brazil</option>
+              <option value="South Africa">South Africa</option>
+            </select>
+          </div>
+
+          {/* Income */}
+          <div>
+            <label className="block text-sm mb-1">Select income</label>
+            <select
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              value={income}
+              onChange={(e) => setIncome(e.target.value)}
+              required
+            >
+              <option value="">-- Choose --</option>
+              <option value="Below $25k">Below $25k</option>
+              <option value="$25k–$50k">$25k–$50k</option>
+              <option value="$50k–$75k">$50k–$75k</option>
+              <option value="$75k–$100k">$75k–$100k</option>
+              <option value="$100k–$150k">$100k–$150k</option>
+              <option value="Above $150k">Above $150k</option>
+            </select>
+          </div>
+
+          {/* Submit */}
+          <button
+            className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Creating..." : "Sign up"}
+          </button>
+        </form>
+
+        <div className="mt-4 text-sm text-center">
+          Already have an account?{" "}
+          <Link to="/" className="text-blue-600 hover:underline">
+            Sign in
+          </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

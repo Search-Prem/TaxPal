@@ -5,3 +5,16 @@
 :root {
   --brand:#2151FF;
 }
+/* Hide default password reveal/eye icon in Edge & Chrome */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
