@@ -13,7 +13,7 @@ export default function Login() {
     e.preventDefault()
     setError('')
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('http://localhost:5001/auth/login', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify(form)
@@ -22,7 +22,7 @@ export default function Login() {
       if(!res.ok) throw new Error(data.message || 'Login failed')
       localStorage.setItem('token', data.token)
       alert('Logged in! (token in localStorage)')
-      nav('/login') // stay here for demo
+      nav('/dashboard') // stay here for demo
     } catch(err) {
       setError(err.message)
     }
@@ -64,17 +64,9 @@ export default function Login() {
             <Button type="submit">Sign In</Button>
           </form>
 
-          <div className="my-6 flex items-center gap-4">
-            <div className="h-px bg-gray-200 flex-1" />
-            <span className="text-gray-500 text-sm">OR CONTINUE WITH</span>
-            <div className="h-px bg-gray-200 flex-1" />
-          </div>
+          
 
-          <div className="grid grid-cols-2 gap-3">
-            <OAuthButton provider="Google" />
-            <OAuthButton provider="Microsoft" />
-          </div>
-
+          
           <p className="text-center text-sm text-gray-600 mt-6">
             Don&apos;t have an account?{' '}
             <Link to="/register" className="text-blue-600 font-medium">Create Account</Link>

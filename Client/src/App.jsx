@@ -1,7 +1,12 @@
 import { Routes, Route, Link, Navigate } from 'react-router-dom'
+//import Home from "./pages/Home";
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
-import ForgotPassword from './pages/ForgotPassword.jsx'
+import Forgot from './pages/Forgot.jsx'
+import Reset from './pages/Reset.jsx'
+import Dashboard from './pages/Dashboard.jsx'
+
+
 
 function Navbar() {
   return (
@@ -25,12 +30,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot" element={<ForgotPassword />} />
-      </Routes>
+      <Routes>    {/* Show Home.jsx */}
+  <Route path="/" element={<Login />} />
+  <Route path="/register" element={<Register />} />
+  <Route path="/forgot" element={<Forgot />} />
+  <Route path="/reset" element={<Reset />} />
+  <Route path="/dashboard" element={<Dashboard />} />
+</Routes>
+
     </div>
   )
 }
