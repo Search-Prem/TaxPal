@@ -7,6 +7,7 @@ import Features from "./pages/Features.jsx";
 import Pricing from "./pages/Pricing.jsx";
 import Support from "./pages/Support.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
+import Logs from "./pages/Logs.jsx"; // ✅ added
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Sidebar from "./components/Sidebar.jsx";
@@ -69,15 +70,35 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/reset" element={<Reset />} />
-        <Route path="/dashboard" element={
-          <div className="flex h-screen bg-gray-100 font-sans">
-            <Sidebar />
-           <main className="flex-1 p-6 md:p-8 lg:p-10">
-            <Dashboard />
-          </main>
-          </div>} />
-        <Route path="/features" element={<Features />} />  
-        <Route path="/pricing" element={<Pricing />} /> 
+
+        {/* Dashboard layout wrapper */}
+        <Route
+          path="/dashboard"
+          element={
+            <div className="flex h-screen bg-gray-100 font-sans">
+              <Sidebar />
+              <main className="flex-1 p-6 md:p-8 lg:p-10">
+                <Dashboard />
+              </main>
+            </div>
+          }
+        />
+
+        {/* ✅ Logs route with same layout */}
+        <Route
+          path="/logs"
+          element={
+            <div className="flex h-screen bg-gray-100 font-sans">
+              <Sidebar />
+              <main className="flex-1 p-6 md:p-8 lg:p-10">
+                <Logs />
+              </main>
+            </div>
+          }
+        />
+
+        <Route path="/features" element={<Features />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/support" element={<Support />} />
       </Routes>
 
