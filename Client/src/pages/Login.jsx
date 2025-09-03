@@ -1,14 +1,13 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function Login() {
+export default function Login({ setIsAuthenticated }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -23,11 +22,24 @@ export default function Login() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
+      // ✅ Save token
       localStorage.setItem("token", data.token);
-localStorage.setItem("email", email);
+
+      // ✅ Save email
+      localStorage.setItem("email", email);
+
+      // ✅ Save name (prefer backend → fallback to email before @)
+      if (data.name) {
+        localStorage.setItem("name", data.name);
+      } else {
+        const fallbackName = email.split("@")[0];
+        localStorage.setItem("name", fallbackName);
+      }
+
+      // ✅ update App.jsx state
+      setIsAuthenticated(true);
 
       toast.success("Successfully logged in");
-      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
       toast.error(err.message);
@@ -35,7 +47,7 @@ localStorage.setItem("email", email);
   };
 
   return (
-    <main className="min-h-[calc(100vh-64px)] grid place-items-center bg-gray-50">
+    <main className="min-h-screen grid place-items-center bg-gray-50">
       <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-xl">
         <h1 className="text-2xl font-semibold text-center mb-2">Sign In</h1>
         <p className="text-center text-gray-500 mb-6">
@@ -92,7 +104,7 @@ localStorage.setItem("email", email);
 
         <div className="mt-4 text-sm text-center">
           Don’t have an account?{" "}
-          <Link to="/Register" className="text-blue-600 hover:underline">
+          <Link to="/register" className="text-blue-600 hover:underline">
             Create one
           </Link>
         </div>
