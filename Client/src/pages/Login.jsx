@@ -23,8 +23,8 @@ export default function Login() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      // ✅ Save token like old code
       localStorage.setItem("token", data.token);
+localStorage.setItem("email", email);
 
       toast.success("Successfully logged in");
       navigate("/dashboard");
