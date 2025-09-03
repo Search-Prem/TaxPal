@@ -106,8 +106,8 @@ export default function Reset() {
         </form>
 
         <p className="text-sm text-gray-600 mt-6 text-center">
-          <Link to="/" className="text-blue-600 hover:underline">
-            Back to Login
+          <Link to="/forgot" className="text-blue-600 hover:underline">
+            Back 
           </Link>
         </p>
       </div>
