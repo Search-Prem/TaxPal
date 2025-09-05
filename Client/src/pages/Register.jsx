@@ -54,7 +54,7 @@ export default function Register() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-64px)] grid place-items-center">
+    <main className="min-h-screen grid place-items-center">
       <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-2xl">
         <h1 className="text-2xl font-semibold text-center mb-2">
           Create account
