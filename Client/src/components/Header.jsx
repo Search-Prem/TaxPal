@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-
+import logo from "./logo.png";
 export default function Header({ isAuthenticated, onLogout }) {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -30,12 +30,14 @@ export default function Header({ isAuthenticated, onLogout }) {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow">
       <div className="flex items-center justify-between px-6 py-3">
         {/* Logo */}
-        <h1
-          className="text-xl font-bold text-blue-600 cursor-pointer"
-          onClick={() => navigate(isAuthenticated ? "/dashboard" : "/")}
-        >
-          TaxPal
-        </h1>
+        <div
+    className="flex items-center gap-2 cursor-pointer"
+    onClick={() => navigate(isAuthenticated ? "/dashboard" : "/")}
+  >
+    <img src={logo} alt="Logo" className="h-8 w-8" />
+    <h1 className="text-xl font-bold text-blue-600">TaxPal</h1>
+  </div>
+
 
         {/* Right side */}
         <div className="flex items-center gap-6">

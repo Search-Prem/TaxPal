@@ -61,7 +61,7 @@ export default function Logs() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-white">
       {/* Tabs */}
       <div className="flex gap-6 mb-6 border-b">
         <button
