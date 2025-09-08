@@ -16,7 +16,7 @@ import Logs from "./pages/Logs.jsx";
 import Budgeting from "./pages/Budgeting.jsx";
 import TaxEstimator from "./pages/TaxEstimator.jsx";
 import Report from "./pages/Report.jsx";
-
+import Category from "./pages/Category.jsx";
 // Components
 import Header from "./components/Header.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -127,6 +127,18 @@ export default function App() {
             )
           }
         />
+        <Route        
+          path="/category"      
+          element={       
+            isAuthenticated ? (
+              <PrivateLayout>        
+                <Category />        
+                </PrivateLayout>           
+                ) : (       
+                <Navigate to="/" replace />       
+              )    
+            }
+      />
         <Route
           path="/report"
           element={
