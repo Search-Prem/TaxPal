@@ -1,246 +1,169 @@
-import React, { useState } from "react";
-import { FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import Sidebar from "../components/Sidebar";
 
-export default function Logs() {
-  const [activeTab, setActiveTab] = useState("transactions");
-  const [transactions, setTransactions] = useState([
-    { id: 1, date: "2025-09-01", description: "Salary", category: "Income", amount: "+₹50,000" },
-    { id: 2, date: "2025-09-02", description: "Groceries", category: "Expense", amount: "-₹2,000" },
-    { id: 3, date: "2025-09-02", description: "Freelance Project", category: "Income", amount: "+₹15,000" },
-  ]);
-  const [editingTx, setEditingTx] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("income");
-  const [form, setForm] = useState({ date: "", description: "", category: "", amount: "" });
+// SVG Icon
+const EditIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />
+  </svg>
+);
 
-  const systemLogs = [
-    { date: "2025-09-01 09:00", action: "User Login", status: "Success" },
-    { date: "2025-09-01 18:00", action: "User Logout", status: "Success" },
-    { date: "2025-09-02 10:15", action: "Password Reset", status: "Failed" },
-  ];
+// Dustbin (Delete) Icon
+const DeleteIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 hover:text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
 
-  // Handle delete
-  const handleDelete = (id) => {
-    setTransactions(transactions.filter((tx) => tx.id !== id));
-  };
 
-  // Handle edit
-  const handleEdit = (tx) => {
-    setEditingTx(tx.id);
-    setForm({
-      date: tx.date,
-      description: tx.description,
-      category: tx.category,
-      amount: tx.amount.replace(/[^\d.-]/g, ""),
-    });
-    setModalType(tx.category.toLowerCase());
-    setShowModal(true);
-  };
+// Main Components
+const TransactionOverview = ({ categories }) => {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Transaction Overview</h2>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        {/* Date Range Input */}
+        <div>
+          <label htmlFor="dateRange" className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+          <input type="date" id="dateRange" placeholder="Pick a date" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+        {/* Category Select */}
+        <div>
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <select id="category" className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option>All categories</option>
+            {categories.map((cat) => (
+              <option key={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+        {/* Type Select */}
+        <div>
+          <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+          <select id="type" className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option>All</option>
+            <option>Income</option>
+            <option>Expense</option>
+          </select>
+        </div>
+        {/* Filters Button */}
+        <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150">
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  );
+};
 
-  // Handle add new or update
-  const handleSave = () => {
-    if (!form.date || !form.description || !form.amount) return;
+/**
+ * RecentTransactionsTable Component
+ * Displays a list of transactions in a table format.
+ * @param {object} props - The properties passed to the component.
+ * @param {Array} props.transactions - The array of transaction objects to display.
+ */
+const RecentTransactionsTable = ({ transactions, onDelete }) => {
 
-    const newTx = {
-      id: editingTx || Date.now(),
-      date: form.date,
-      description: form.description,
-      category: modalType === "income" ? "Income" : "Expense",
-      amount: modalType === "income" ? `+₹${form.amount}` : `-₹${form.amount}`,
-    };
-
-    if (editingTx) {
-      setTransactions(transactions.map((tx) => (tx.id === editingTx ? newTx : tx)));
-    } else {
-      setTransactions([...transactions, newTx]);
-    }
-
-    setEditingTx(null);
-    setForm({ date: "", description: "", category: "", amount: "" });
-    setShowModal(false);
+  //format currency
+  const formatCurrency = (amount) => {
+    const isNegative = amount < 0;
+    const formatted = new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.abs(amount)).replace('₹', '₹');
+    return isNegative ? `-${formatted}` : formatted;
   };
 
   return (
-    <div className="p-6 bg-white">
-      {/* Tabs */}
-      <div className="flex gap-6 mb-6 border-b">
-        <button
-          onClick={() => setActiveTab("transactions")}
-          className={`pb-2 font-medium ${
-            activeTab === "transactions" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"
-          }`}
-        >
-          Transactions
-        </button>
-        <button
-          onClick={() => setActiveTab("system")}
-          className={`pb-2 font-medium ${
-            activeTab === "system" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"
-          }`}
-        >
-          System Logs
-        </button>
+    <div className="bg-white p-6 rounded-lg shadow-lg overflow-hidden">
+      <div className="p-6">
+        <h2 className="text-xl font-semibold text-gray-800">Recent Transactions</h2>
       </div>
-
-      {/* Transactions Tab */}
-      {activeTab === "transactions" && (
-        <>
-          {/* Transaction Filters */}
-          <div className="border rounded-lg p-4 mb-6">
-            <h3 className="text-xl font-semibold mb-4">Transaction Overview</h3>
-            <div className="flex gap-4 flex-wrap">
-              <input type="date" className="border p-2 rounded w-40" />
-              <select className="border p-2 rounded w-40">
-                <option>All categories</option>
-                <option>Income</option>
-                <option>Expense</option>
-              </select>
-              <input type="text" placeholder="Search..." className="border p-2 rounded flex-1" />
-              <button className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2">
-                <FaSearch /> Apply
-              </button>
-            </div>
-          </div>
-
-          {/* Recent Transactions */}
-          <div className="border rounded-lg p-4">
-            <h3 className="text-xl font-semibold mb-4">Recent Transactions</h3>
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2 text-left border">Date</th>
-                  <th className="p-2 text-left border">Description</th>
-                  <th className="p-2 text-left border">Category</th>
-                  <th className="p-2 text-left border">Amount</th>
-                  <th className="p-2 text-left border">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-gray-50">
-                    <td className="p-2 border">{tx.date}</td>
-                    <td className="p-2 border">{tx.description}</td>
-                    <td className="p-2 border">{tx.category}</td>
-                    <td
-                      className={`p-2 border font-medium ${
-                        tx.amount.startsWith("+") ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {tx.amount}
-                    </td>
-                    <td className="p-2 border flex gap-2">
-                      <button className="text-blue-500 hover:text-blue-700" onClick={() => handleEdit(tx)}>
-                        <FaEdit />
-                      </button>
-                      <button className="text-red-500 hover:text-red-700" onClick={() => handleDelete(tx.id)}>
-                        <FaTrash />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Add Buttons */}
-          <div className="mt-6 flex gap-4">
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-              onClick={() => {
-                setModalType("income");
-                setEditingTx(null);
-                setForm({ date: "", description: "", category: "", amount: "" });
-                setShowModal(true);
-              }}
-            >
-              Add Income
-            </button>
-            <button
-              className="bg-gray-400 text-white px-4 py-2 rounded"
-              onClick={() => {
-                setModalType("expense");
-                setEditingTx(null);
-                setForm({ date: "", description: "", category: "", amount: "" });
-                setShowModal(true);
-              }}
-            >
-              Add Expense
-            </button>
-          </div>
-        </>
-      )}
-
-      {/* System Logs Tab */}
-      {activeTab === "system" && (
-        <div className="border rounded-lg p-4">
-          <h3 className="text-xl font-semibold mb-4">System Logs</h3>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2 text-left border">Date & Time</th>
-                <th className="p-2 text-left border">Action</th>
-                <th className="p-2 text-left border">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {systemLogs.map((log, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="p-2 border">{log.date}</td>
-                  <td className="p-2 border">{log.action}</td>
-                  <td
-                    className={`p-2 border font-medium ${
-                      log.status === "Success" ? "text-green-600" : "text-red-600"
-                    }`}
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {transactions.map((transaction) => (
+              <tr key={transaction._id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.date}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.description}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
+                <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.amount < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {formatCurrency(transaction.amount)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
+                  <button className="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <EditIcon />
+                  </button>
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    onClick={() => onDelete(transaction._id)}
                   >
-                    {log.status}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                    <DeleteIcon />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h3 className="text-xl font-semibold mb-4">
-              {editingTx ? "Edit Transaction" : `Add ${modalType === "income" ? "Income" : "Expense"}`}
-            </h3>
-            <div className="flex flex-col gap-3">
-              <input
-                type="date"
-                className="border p-2 rounded"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                className="border p-2 rounded"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
-              <input
-                type="number"
-                placeholder="Amount"
-                className="border p-2 rounded"
-                value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
-              />
-            </div>
-            <div className="mt-4 flex justify-end gap-3">
-              <button className="px-4 py-2 border rounded" onClick={() => setShowModal(false)}>
-                Cancel
-              </button>
-              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSave}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
+
+ // App Component
+
+export default function App() {
+  const [transactions, setTransactions] = useState([]);
+
+  // Fetch transactions from backend API
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch('/api/transactions');
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const categories = Array.from(new Set(transactions.map(tx => tx.category)));
+
+  // Delete handler
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this transaction?")) {
+      try {
+        await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+        await fetchTransactions(); // Refetch after delete
+      } catch (error) {
+        alert("Failed to delete transaction");
+      }
+    }
+  };
+
+  return (
+    <div className="bg-gray-50 min-h-screen font-sans">
+      <Sidebar categories={categories} refreshTransactions={fetchTransactions} />
+      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Income & Expense Log</h1>
+        <TransactionOverview categories={categories} />
+        <RecentTransactionsTable transactions={transactions} onDelete={handleDelete} />
+      </main>
     </div>
   );
 }
