@@ -98,7 +98,7 @@ export default function Login({ setIsAuthenticated }) {
             className="btn w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
             type="submit"
           >
-            Login
+            Sign in
           </button>
         </form>
 
