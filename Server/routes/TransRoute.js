@@ -1,22 +1,36 @@
 import express from "express";
 import Transaction from "../models/Transaction.js";
+import authMiddleware from "../middlewares/authMiddleware.js"; // make sure you created this
 
 const router = express.Router();
 
-// GET all transactions
-router.get("/", async (req, res) => {
+// ✅ Get all transactions for logged-in user
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const transactions = await Transaction.find().sort({ createdAt: -1 });
+    const transactions = await Transaction.find({ user_id: req.user.id }).sort({ createdAt: -1 });
     res.json(transactions);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch transactions" });
   }
 });
 
-// POST a new transaction
-router.post("/", async (req, res) => {
+// ✅ Add new transaction
+router.post("/", authMiddleware, async (req, res) => {
   try {
-    const transaction = new Transaction(req.body);
+    const { type, category, amount, date, description } = req.body;
+
+    // Convert date to 'YYYY-MM-DD' string for schema storing string date
+    const dateOnly = new Date(date).toISOString().slice(0, 10);
+
+    const transaction = new Transaction({
+      user_id: req.user.id,
+      type,
+      category,
+      amount,
+      date: dateOnly,
+      description
+    });
+
     await transaction.save();
     res.status(201).json(transaction);
   } catch (err) {
@@ -24,9 +38,15 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+
+// ✅ Delete transaction
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    await Transaction.findByIdAndDelete(req.params.id);
+    const transaction = await Transaction.findOneAndDelete({
+      _id: req.params.id,
+      user_id: req.user.id
+    });
+    if (!transaction) return res.status(404).json({ error: "Transaction not found" });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete transaction" });

@@ -1,180 +1,245 @@
-import { useState } from "react";
-import { Pencil, PlusCircle, Trash } from "lucide-react";
+import { useState, useEffect } from "react";
+import { PlusCircle, Trash } from "lucide-react";
 
-export default function Categories() {
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Groceries", budget: 1234, spent: 124, type: "expense" },
-    { id: 2, name: "Dining Out", budget: 0, spent: 0, type: "expense" },
-    { id: 3, name: "Salary", budget: 50000, spent: 0, type: "income" },
-  ]);
+export default function Budgets() {
+  const [budgets, setBudgets] = useState([]);
+  const [health, setHealth] = useState([]); // ✅ Store budget health results
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
-  const [editingId, setEditingId] = useState(null);
-  const [newName, setNewName] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
-  const [newType, setNewType] = useState("expense");
-  const [filter, setFilter] = useState("all");
+  // Budget form state
+  const [budgetCategory, setBudgetCategory] = useState("");
+  const [budgetAmount, setBudgetAmount] = useState("");
+  const [budgetMonth, setBudgetMonth] = useState("");
+  const [budgetDescription, setBudgetDescription] = useState("");
 
-  const saveName = (id) => {
-    setCategories((cats) =>
-      cats.map((c) => (c.id === id ? { ...c, name: newName } : c))
-    );
-    setEditingId(null);
+  // ✅ Fetch budgets + budget health
+  useEffect(() => {
+    const fetchBudgets = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        // get budgets
+        const res = await fetch("http://localhost:5001/budgets", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch budgets");
+        const data = await res.json();
+        setBudgets(data);
+
+        // get budget health
+        const healthRes = await fetch("http://localhost:5001/budgets/check", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (healthRes.ok) {
+          const healthData = await healthRes.json();
+          setHealth(healthData);
+        }
+      } catch (err) {
+        console.error("Error fetching budgets:", err);
+      }
+    };
+
+    fetchBudgets();
+  }, []);
+
+  // ✅ Create budget
+  const createBudget = async () => {
+    if (!budgetCategory || !budgetMonth || !budgetAmount) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("No token found. Please log in again.");
+      return;
+    }
+
+    const newBudget = {
+      category: budgetCategory,
+      budgetAmount: Number(budgetAmount),
+      month: budgetMonth,
+      description: budgetDescription,
+    };
+
+    try {
+      const res = await fetch("http://localhost:5001/budgets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(newBudget),
+      });
+
+      if (!res.ok) throw new Error("Failed to create budget");
+
+      const data = await res.json();
+      setBudgets([...budgets, data]);
+
+      // Reset form
+      setBudgetCategory("");
+      setBudgetAmount("");
+      setBudgetMonth("");
+      setBudgetDescription("");
+      setShowBudgetModal(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const deleteCategory = (id) => {
-    setCategories((cats) => cats.filter((c) => c.id !== id));
-    setEditingId(null);
-  };
+  // ✅ Delete budget
+  const deleteBudget = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-  const addCategory = () => {
-    if (!newCategory.trim()) return;
-    setCategories((cats) => [
-      ...cats,
-      {
-        id: Date.now(),
-        name: newCategory,
-        budget: 0,
-        spent: 0,
-        type: newType,
-      },
-    ]);
-    setNewCategory("");
-    setNewType("expense");
-    setShowModal(false);
-  };
+      await fetch(`http://localhost:5001/budgets/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-  const filteredCategories =
-    filter === "all"
-      ? categories
-      : categories.filter((cat) => cat.type === filter);
+      setBudgets(budgets.filter((b) => b._id !== id));
+      setHealth(health.filter((h) => h.budgetId !== id)); // remove health check too
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <main className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Categorization & Budgeting</h1>
+        <h1 className="text-2xl font-bold">Budgets</h1>
         <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          onClick={() => setShowBudgetModal(true)}
+          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
         >
           <PlusCircle size={18} />
-          Add New Category
+          Create New Budget
         </button>
       </div>
 
-      {/* Filter Buttons */}
-      <div className="flex gap-4 mb-6">
-        {["all", "income", "expense"].map((type) => (
-          <button
-            key={type}
-            onClick={() => setFilter(type)}
-            className={`px-4 py-2 rounded ${
-              filter === type
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700"
-            }`}
-          >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid of categories */}
+      {/* Budgets Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredCategories.map((cat) => (
-          <div
-            key={cat.id}
-            className="relative bg-white rounded-xl shadow-md p-4 border hover:shadow-lg transition"
-          >
-            {/* Title row with edit */}
-            <div className="flex justify-between items-center mb-3">
-              {editingId === cat.id ? (
-                <div className="flex items-center gap-2 w-full">
-                  <input
-                    className="border px-2 py-1 rounded w-full"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && saveName(cat.id)}
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => deleteCategory(cat.id)}
-                    className="p-1 text-red-500 hover:text-red-700"
-                  >
-                    <Trash size={18} />
-                  </button>
-                </div>
-              ) : (
+        {budgets.map((budget) => {
+          const status = health.find(
+            (h) => h.category === budget.category && h.month === budget.month
+          );
+          return (
+            <div
+              key={budget._id}
+              className="relative bg-white rounded-xl shadow-md p-4 border hover:shadow-lg transition"
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-blue-600">{budget.category}</h2>
+                <button
+                  onClick={() => deleteBudget(budget._id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash size={18} />
+                </button>
+              </div>
+              <p className="text-sm text-gray-500">Monthly Budget</p>
+              <p className="text-lg font-bold">₹{budget.budgetAmount}</p>
+              <p className="text-sm text-gray-500 mt-2">Month</p>
+              <p className="text-base font-semibold">{budget.month}</p>
+              {budget.description && (
                 <>
-                  <h2
-                    className={`font-semibold ${
-                      cat.type === "income"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {cat.name}
-                  </h2>
-                  <button
-                    onClick={() => {
-                      setEditingId(cat.id);
-                      setNewName(cat.name);
-                    }}
-                  >
-                    <Pencil
-                      size={16}
-                      className="text-gray-500 hover:text-gray-700"
-                    />
-                  </button>
+                  <p className="text-sm text-gray-500 mt-2">Description</p>
+                  <p className="text-base">{budget.description}</p>
                 </>
               )}
+
+              {/* ✅ Budget Health Section */}
+              {status && (
+                <div className="mt-4 p-2 rounded-lg text-center font-medium"
+                  style={{
+                    backgroundColor: status.status === "Within Budget" ? "#dcfce7" : "#fee2e2",
+                    color: status.status === "Within Budget" ? "#166534" : "#991b1b",
+                  }}
+                >
+                  {status.status} (Spent: ₹{status.spent} / Remaining: ₹{status.remaining})
+                </div>
+              )}
             </div>
-
-            {/* Budget Info */}
-            <p className="text-sm text-gray-500">Monthly Budget</p>
-            <p className="text-lg font-bold">₹{cat.budget.toLocaleString()}</p>
-
-            <p className="text-sm text-gray-500 mt-2">Spent</p>
-            <p className="text-base font-semibold">₹{cat.spent.toLocaleString()}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Modal for Adding Category */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-            <h2 className="text-xl font-semibold mb-4">Add New Category</h2>
-            <input
-              type="text"
-              className="w-full border px-3 py-2 rounded mb-4"
-              placeholder="Category name"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-            />
-            <select
-              className="w-full border px-3 py-2 rounded mb-4"
-              value={newType}
-              onChange={(e) => setNewType(e.target.value)}
+      {/* Modal (unchanged) */}
+      {showBudgetModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
+            <h2 className="text-xl font-semibold mb-6">Create New Budget</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                createBudget();
+              }}
+              className="grid grid-cols-2 gap-6"
             >
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-            </select>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 border rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={addCategory}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Add
-              </button>
-            </div>
+              <div>
+                <label className="block font-medium mb-1">Category</label>
+                <input
+                  type="text"
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="e.g. Groceries"
+                  value={budgetCategory}
+                  onChange={(e) => setBudgetCategory(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium mb-1">Budget Amount</label>
+                <input
+                  type="number"
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="₹ 0.00"
+                  min="0"
+                  value={budgetAmount}
+                  onChange={(e) => setBudgetAmount(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium mb-1">Month</label>
+                <input
+                  type="month"
+                  className="w-full border rounded px-3 py-2"
+                  value={budgetMonth}
+                  onChange={(e) => setBudgetMonth(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block font-medium mb-1">Description</label>
+                <textarea
+                  className="w-full border rounded px-3 py-2"
+                  rows="3"
+                  placeholder="Add any details..."
+                  value={budgetDescription}
+                  onChange={(e) => setBudgetDescription(e.target.value)}
+                />
+              </div>
+
+              <div className="col-span-2 flex justify-end gap-4 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowBudgetModal(false)}
+                  className="px-4 py-2 border rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Create Budget
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

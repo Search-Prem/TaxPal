@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js";
 import transactionsRouter from "./routes/TransRoute.js";
+import budgetRoutes from "./routes/budgetRoutes.js";
 
 
 dotenv.config();
@@ -11,7 +12,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use("/api/transactions", transactionsRouter);
+app.use("/transactions", transactionsRouter);
 
 //  Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -24,6 +25,7 @@ mongoose.connect(process.env.MONGO_URI, {
 //  Routes
 
 app.use('/auth', authRoutes);
+app.use("/budgets", budgetRoutes);
 
 // Start Server
 const PORT = process.env.PORT || 5001;

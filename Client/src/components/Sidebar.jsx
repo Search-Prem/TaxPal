@@ -44,28 +44,36 @@ export default function Sidebar({ categories, refreshTransactions }) {
 
   // Handle form submit
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    let amount = Number(form.amount);
-    if (modalType === "expense" && amount > 0) {
-      amount = -amount;
-    }
-    const rawCategory = categoryMode === "new" ? newCategory : form.category;
-    const categoryToUse = capitalize(rawCategory.trim());
-    try {
-      await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, amount, category: categoryToUse })
-      });
-      setShowModal(false);
-      setForm({ date: "", description: "", category: "", amount: "" });
-      setCategoryMode("select");
-      setNewCategory("");
-      if (refreshTransactions) refreshTransactions(); // Refetch after insert
-    } catch (err) {
-      alert("Failed to add transaction");
-    }
-  };
+  e.preventDefault();
+  const amount = Number(form.amount);
+  const rawCategory = categoryMode === "new" ? newCategory : form.category;
+  const categoryToUse = capitalize(rawCategory.trim());
+  const token = localStorage.getItem("token");  // <-- FIX
+
+  try {
+    await fetch("http://localhost:5001/transactions", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ 
+        ...form, 
+        amount, 
+        category: categoryToUse, 
+        type: modalType === "income" ? "Income" : "Expense"
+      })
+    });
+    setShowModal(false);
+    setForm({ date: "", description: "", category: "", amount: "" });
+    setCategoryMode("select");
+    setNewCategory("");
+    if (refreshTransactions) refreshTransactions();
+  } catch (err) {
+    alert("Failed to add transaction");
+  }
+};
+
 
   return (
     <aside className="fixed top-16 left-0 h-full w-56 bg-white shadow-md pb-20 flex flex-col justify-between">
@@ -165,24 +173,26 @@ export default function Sidebar({ categories, refreshTransactions }) {
                 required
                 className="border px-3 py-2 rounded"
               />
-              <div className="flex gap-2 mt-2">
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Add
-                </button>
-                <button
-                  type="button"
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-                  onClick={() => {
-                    setShowModal(false);
-                    setCategoryMode("select");
-                    setNewCategory("");
-                  }}
-                >
-                  Cancel
-                </button>
+              
+                <div className="flex gap-2 mt-2 justify-end">
+  <button
+    type="button"
+    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+    onClick={() => {
+      setShowModal(false);
+      setCategoryMode("select");
+      setNewCategory("");
+    }}
+  >
+    Cancel
+  </button>
+  <button
+    type="submit"
+    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+  >
+    Add
+  </button>
+
               </div>
             </form>
           </div>
