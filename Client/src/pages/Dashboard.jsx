@@ -50,7 +50,7 @@ const Dashboard = () => {
         <StatCard title="Net Balance" amount={balance.toLocaleString()} currency="₹" icon={<FaDollarSign />} color="text-blue-500" />
         <StatCard title="Tax Estimate" amount={(expense * 0.2).toLocaleString()} currency="₹" icon={<FaDollarSign />} color="text-purple-500" />
         <StatCard title="Savings Rate" amount={savingsRate} currency="%" icon={<FiPercent />} color="text-indigo-500" isText/>
-        <StatCard title="Upcoming Bills" amount="3 Bills Due" icon={<FaRegCalendarAlt />} color="text-yellow-600" isText />
+        <StatCard title="Upcoming Bills" amount="0 Bills Due" icon={<FaRegCalendarAlt />} color="text-yellow-600" isText />
       </div>
 
       {/* Charts */}

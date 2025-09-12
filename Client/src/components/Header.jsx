@@ -74,35 +74,35 @@ export default function Header({ isAuthenticated, onLogout }) {
                   />
                 </button>
 
-               {dropdownOpen && (
-  <div className="absolute right-0 top-full mt-2 w-40 bg-white border rounded shadow-lg z-50">
-    {/* Settings */}
-    <button
-      onClick={() => navigate("/category")} // navigate to settings page
-      className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-    >
-      <img
-        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDgp53HKq4fyclYtZdD-0wHVV2YC2rZ0tmGg&s" // add your settings icon path
-        alt="settings"
-        className="w-4 h-4"
-      />
-      Settings
-    </button>
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-40 bg-white border rounded shadow-lg z-50">
+                    {/* Settings */}
+                    <button
+                      onClick={() => navigate("/category")} // navigate to settings page
+                      className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
+                    >
+                      <img
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDgp53HKq4fyclYtZdD-0wHVV2YC2rZ0tmGg&s" // add your settings icon path
+                        alt="settings"
+                        className="w-4 h-4"
+                      />
+                      Settings
+                    </button>
 
-    {/* Logout */}
-    <button
-      onClick={() => setShowLogoutModal(true)}
-      className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
-    >
-      <img
-        src="https://cdn-icons-png.flaticon.com/128/4400/4400629.png" // add your logout icon path
-        alt="logout"
-        className="w-4 h-4"
-      />
-      Logout
-    </button>
-  </div>
-)}
+                    {/* Logout */}
+                    <button
+                      onClick={() => setShowLogoutModal(true)}
+                      className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
+                    >
+                      <img
+                        src="https://cdn-icons-png.flaticon.com/128/4400/4400629.png" // add your logout icon path
+                        alt="logout"
+                        className="w-4 h-4"
+                      />
+                      Logout
+                    </button>
+                  </div>
+                )}
 
               </div>
             )}

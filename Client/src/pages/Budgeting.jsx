@@ -5,7 +5,7 @@ export default function Budgets() {
   const [budgets, setBudgets] = useState([]);
   const [health, setHealth] = useState([]); // ✅ Store budget health results
   const [showBudgetModal, setShowBudgetModal] = useState(false);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(null);
   // Budget form state
   const [budgetCategory, setBudgetCategory] = useState("");
   const [budgetAmount, setBudgetAmount] = useState("");
@@ -111,9 +111,9 @@ export default function Budgets() {
         <h1 className="text-2xl font-bold">Budgets</h1>
         <button
           onClick={() => setShowBudgetModal(true)}
-          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
-          <PlusCircle size={18} />
+          {/* <PlusCircle size={18} /> */}
           Create New Budget
         </button>
       </div>
@@ -132,11 +132,12 @@ export default function Budgets() {
               <div className="flex justify-between items-center mb-3">
                 <h2 className="font-semibold text-blue-600">{budget.category}</h2>
                 <button
-                  onClick={() => deleteBudget(budget._id)}
+                  onClick={() => setShowDeleteModal(budget._id)}
                   className="text-red-500 hover:text-red-700"
                 >
                   <Trash size={18} />
                 </button>
+
               </div>
               <p className="text-sm text-gray-500">Monthly Budget</p>
               <p className="text-lg font-bold">₹{budget.budgetAmount}</p>
@@ -164,6 +165,31 @@ export default function Budgets() {
           );
         })}
       </div>
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-96">
+            <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
+            <p className="mb-6">Are you sure you want to delete this budget item?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowDeleteModal(null)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  deleteBudget(showDeleteModal); // call delete function
+                  setShowDeleteModal(null); // close modal
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal (unchanged) */}
       {showBudgetModal && (
