@@ -21,7 +21,9 @@ router.post("/", authMiddleware, async (req, res) => {
 
     // Convert date to 'YYYY-MM-DD' string for schema storing string date
     const dateOnly = new Date(date).toISOString().slice(0, 10);
-
+    if (new Date(dateOnly) > new Date()) {
+      return res.status(400).json({ error: "Date cannot be in the future" });
+    }
     const transaction = new Transaction({
       user_id: req.user.id,
       type,

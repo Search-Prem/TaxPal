@@ -206,11 +206,12 @@ export default function Sidebar({ categories, refreshTransactions }) {
               Date
               <input
                 type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                required
-                className="mt-1 border px-3 py-2 rounded w-full"
+              name="date"
+              value={form.date}
+              onChange={handleChange}
+              required
+              max={new Date().toISOString().split("T")[0]}   // ✅ disallow future dates
+              className="mt-1 border px-3 py-2 rounded w-full"
               />
             </label>
           </div>
