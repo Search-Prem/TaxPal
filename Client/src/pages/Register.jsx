@@ -54,9 +54,9 @@ export default function Register() {
   };
 
   return (
-    <main className="min-h-screen grid place-items-center">
-      <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-2xl">
-        <h1 className="text-2xl font-semibold text-center mb-2">
+   <main className="min-h-screen grid place-items-center pt-20">
+  <div className="w-full max-w-md p-6 bg-white shadow-lg rounded-2xl">
+    <h1 className="text-2xl font-semibold text-center mb-2">
           Create account
         </h1>
         <p className="text-center text-gray-500 mb-6">

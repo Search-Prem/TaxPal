@@ -113,43 +113,79 @@ export default function Sidebar({ categories, refreshTransactions }) {
       </div>
 
       {/* Modal/Card */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-80">
-            <h2 className="text-lg font-semibold mb-4">
-              {modalType === "income" ? "Add Income" : "Add Expense"}
+    {showModal && (
+  <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-30">
+    {/* Add vertical padding so there’s equal space at top and bottom */}
+    <div className="min-h-screen flex items-center justify-center py-12 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 max-h-[calc(100vh-6rem)] overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h2 className="text-lg font-semibold">
+              {modalType === "income" ? "Record New Income" : "Record New Expense"}
             </h2>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                type="date"
-                name="date"
-                placeholder="Date"
-                value={form.date}
-                onChange={handleChange}
-                required
-                className="border px-3 py-2 rounded"
-              />
-              <input
-                type="text"
-                name="description"
-                placeholder="Description"
-                value={form.description}
-                onChange={handleChange}
-                required
-                className="border px-3 py-2 rounded"
-              />
-              {/* Category Dropdown and Add New */}
+            <p className="text-sm text-gray-500 mt-1">
+              Add details about your {modalType} to track your finances better.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="text-gray-400 hover:text-gray-600"
+            onClick={() => {
+              setShowModal(false);
+              setCategoryMode("select");
+              setNewCategory("");
+            }}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <label className="text-sm font-medium text-gray-700">
+            Description
+            <input
+              type="text"
+              name="description"
+              placeholder="e.g. Web Design Project"
+              value={form.description}
+              onChange={handleChange}
+              required
+              className="mt-1 border px-3 py-2 rounded w-full"
+            />
+          </label>
+
+          <label className="text-sm font-medium text-gray-700">
+            Amount
+            <input
+              type="number"
+              name="amount"
+              placeholder="$ 0.00"
+              value={form.amount}
+              onChange={handleChange}
+              required
+              className="mt-1 border px-3 py-2 rounded w-full"
+            />
+          </label>
+
+          <div className="grid grid-cols-2 gap-3">
+            <label className="text-sm font-medium text-gray-700">
+              Category
               {categoryMode === "select" ? (
                 <select
                   name="category"
                   value={form.category}
                   onChange={handleCategoryChange}
                   required
-                  className="border px-3 py-2 rounded"
+                  className="mt-1 border px-3 py-2 rounded w-full"
                 >
-                  <option value="">Select category</option>
+                  <option value="">Select a category</option>
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
                   ))}
                   <option value="__new__">Add new category</option>
                 </select>
@@ -159,45 +195,64 @@ export default function Sidebar({ categories, refreshTransactions }) {
                   name="newCategory"
                   placeholder="New category"
                   value={newCategory}
-                  onChange={e => setNewCategory(e.target.value)}
+                  onChange={(e) => setNewCategory(e.target.value)}
                   required
-                  className="border px-3 py-2 rounded"
+                  className="mt-1 border px-3 py-2 rounded w-full"
                 />
               )}
+            </label>
+
+            <label className="text-sm font-medium text-gray-700">
+              Date
               <input
-                type="number"
-                name="amount"
-                placeholder="Amount"
-                value={form.amount}
+                type="date"
+                name="date"
+                value={form.date}
                 onChange={handleChange}
                 required
-                className="border px-3 py-2 rounded"
+                className="mt-1 border px-3 py-2 rounded w-full"
               />
-              
-                <div className="flex gap-2 mt-2 justify-end">
-  <button
-    type="button"
-    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-    onClick={() => {
-      setShowModal(false);
-      setCategoryMode("select");
-      setNewCategory("");
-    }}
-  >
-    Cancel
-  </button>
-  <button
-    type="submit"
-    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-  >
-    Add
-  </button>
-
-              </div>
-            </form>
+            </label>
           </div>
-        </div>
-      )}
+
+          <label className="text-sm font-medium text-gray-700">
+            Notes (Optional)
+            <textarea
+              name="notes"
+              placeholder="Add any additional details..."
+              value={form.notes || ""}
+              onChange={handleChange}
+              className="mt-1 border px-3 py-2 rounded w-full"
+              rows={3}
+            />
+          </label>
+
+          <div className="flex gap-2 mt-2 justify-end">
+            <button
+              type="button"
+              className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+              onClick={() => {
+                setShowModal(false);
+                setCategoryMode("select");
+                setNewCategory("");
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </aside>
   );
 }

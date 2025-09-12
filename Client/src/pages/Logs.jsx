@@ -100,42 +100,46 @@ const RecentTransactionsTable = ({ transactions, onDelete, onEdit }) => {
       <div className="overflow-x-auto">
         <table className="w-full min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {Array.isArray(transactions) && transactions.length > 0 ? (
-              transactions.map((transaction) => (
-                <tr key={transaction._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.description}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
-                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.amount < 0 ? "text-red-600" : "text-green-600"}`}>
-                    {formatCurrency(transaction.amount)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
-                    <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onEdit(transaction)}>
-                      <EditIcon />
-                    </button>
-                    <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onDelete(transaction)}>
-                      <DeleteIcon />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" className="text-center text-gray-500 py-4">
-                  No transactions found
-                </td>
-              </tr>
-            )}
-          </tbody>
+  <tr>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+  </tr>
+</thead>
+
+<tbody className="bg-white divide-y divide-gray-200">
+  {Array.isArray(transactions) && transactions.length > 0 ? (
+    transactions.map((transaction) => (
+      <tr key={transaction._id} className="hover:bg-gray-50">
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.date}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.description}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.type}</td> {/* 👈 Added Type */}
+        <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.amount < 0 ? "text-red-600" : "text-green-600"}`}>
+          {formatCurrency(transaction.amount)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
+          <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onEdit(transaction)}>
+            <EditIcon />
+          </button>
+          <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onDelete(transaction)}>
+            <DeleteIcon />
+          </button>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="6" className="text-center text-gray-500 py-4">
+        No transactions found
+      </td>
+    </tr>
+  )}
+</tbody>
+
         </table>
       </div>
     </div>
@@ -211,7 +215,9 @@ export default function App() {
     let filtered = transactions;
     if (filterDate) filtered = filtered.filter((t) => t.date === filterDate);
     if (filterCategory !== "All categories") filtered = filtered.filter((t) => t.category === filterCategory);
-    if (filterType !== "All") filtered = filtered.filter((t) => (filterType === "Income" ? t.amount > 0 : t.amount < 0));
+    if (filterType !== "All") {
+    filtered = filtered.filter((t) => t.type === filterType);
+  }
     setFilteredTransactions(filtered);
   };
 
