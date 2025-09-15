@@ -118,7 +118,7 @@ const RecentTransactionsTable = ({ transactions, onDelete, onEdit }) => {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.description}</td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.type}</td> {/* 👈 Added Type */}
-        <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.amount < 0 ? "text-red-600" : "text-green-600"}`}>
+        <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.type==="Expense" ? "text-red-600" : "text-green-600"}`}>
           {formatCurrency(transaction.amount)}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">

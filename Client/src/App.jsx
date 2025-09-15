@@ -17,6 +17,7 @@ import Budgeting from "./pages/Budgeting.jsx";
 import TaxEstimator from "./pages/TaxEstimator.jsx";
 import Report from "./pages/Report.jsx";
 import Category from "./pages/Category.jsx";
+
 // Components
 import Header from "./components/Header.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -42,10 +43,15 @@ export default function App() {
     window.dispatchEvent(new Event("storage"));
   };
 
+  // 🔑 Auto logout on 401
+  const handleAuthError = () => {
+    handleLogout();
+  };
+
   // ✅ Layout for private pages (Header + Sidebar + Content)
   const PrivateLayout = ({ children }) => (
     <div className="flex min-h-screen bg-gray-100 pt-16">
-      <Sidebar />
+      <Sidebar onAuthError={handleAuthError} />
       <main className="flex-1 ml-56 p-6">{children}</main>
     </div>
   );
@@ -84,7 +90,7 @@ export default function App() {
           element={
             isAuthenticated ? (
               <PrivateLayout>
-                <Dashboard />
+                <Dashboard onAuthError={handleAuthError} />
               </PrivateLayout>
             ) : (
               <Navigate to="/" replace />
@@ -96,7 +102,7 @@ export default function App() {
           element={
             isAuthenticated ? (
               <PrivateLayout>
-                <Logs />
+                <Logs onAuthError={handleAuthError} />
               </PrivateLayout>
             ) : (
               <Navigate to="/" replace />
@@ -108,7 +114,7 @@ export default function App() {
           element={
             isAuthenticated ? (
               <PrivateLayout>
-                <Budgeting />
+                <Budgeting onAuthError={handleAuthError} />
               </PrivateLayout>
             ) : (
               <Navigate to="/" replace />
@@ -120,31 +126,31 @@ export default function App() {
           element={
             isAuthenticated ? (
               <PrivateLayout>
-                <TaxEstimator />
+                <TaxEstimator onAuthError={handleAuthError} />
               </PrivateLayout>
             ) : (
               <Navigate to="/" replace />
             )
           }
         />
-        <Route        
-          path="/category"      
-          element={       
+        <Route
+          path="/category"
+          element={
             isAuthenticated ? (
-              <PrivateLayout>        
-                <Category />        
-                </PrivateLayout>           
-                ) : (       
-                <Navigate to="/" replace />       
-              )    
-            }
-      />
+              <PrivateLayout>
+                <Category onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
         <Route
           path="/report"
           element={
             isAuthenticated ? (
               <PrivateLayout>
-                <Report />
+                <Report onAuthError={handleAuthError} />
               </PrivateLayout>
             ) : (
               <Navigate to="/" replace />
