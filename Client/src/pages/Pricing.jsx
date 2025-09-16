@@ -28,18 +28,17 @@ export default function Pricing() {
   const navigate = useNavigate();
 
   return (
-    <section className="py-16 bg-white">
-      <h2 className="text-3xl font-bold text-center mb-12">Pricing</h2>
-      <div className="flex flex-wrap justify-center gap-8">
+    <section className="py-28 bg-white min-h-[90vh]">
+      <h2 className="text-3xl font-bold text-center mb-14">Pricing</h2>
+      <div className="flex flex-wrap justify-center gap-10 max-w-6xl mx-auto">
         {plans.map((p, i) => (
           <div
             key={i}
-            className="w-[280px] md:w-[300px] p-8 border rounded-2xl shadow-md text-center flex flex-col"
+            className="w-[280px] md:w-[300px] p-8 border rounded-3xl shadow-lg text-center flex flex-col"
           >
             <h3 className="font-semibold text-xl">{p.name}</h3>
             <p className="text-2xl font-bold text-blue-600 mt-2">{p.price}</p>
 
-            {/* Features List */}
             <ul className="mt-6 space-y-3 flex-1 text-left">
               {p.features.map((f, idx) => (
                 <li key={idx} className="flex items-center gap-3">
@@ -56,7 +55,7 @@ export default function Pricing() {
         ))}
       </div>
 
-      {/* ✅ Back to Login button */}
+      {/* Back to Login button */}
       <div className="text-center mt-12">
         <button
           onClick={() => navigate("/")}

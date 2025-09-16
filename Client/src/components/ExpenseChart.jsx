@@ -1,55 +1,39 @@
-import React from 'react';
-import { Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import React from "react";
+import { Doughnut } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const ExpenseChart = () => {
+const ExpenseChart = ({ transactions }) => {
+  // Only take expenses
+  const expenses = transactions.filter((t) => t.type === "Expense");
+
+  // Group by category
+  const dataByCategory = expenses.reduce((acc, curr) => {
+    acc[curr.category] = (acc[curr.category] || 0) + curr.amount;
+    return acc;
+  }, {});
+
   const data = {
-    labels: ['Groceries', 'Dining Out', 'Fuel', 'Utilities', 'Travel', 'Health', 'Education', 'Savings'],
+    labels: Object.keys(dataByCategory),
     datasets: [
       {
-        label: 'Expenses',
-        data: [45, 25, 10, 8, 7, 5, 5, 15],
+        label: "Expenses",
+        data: Object.values(dataByCategory),
         backgroundColor: [
-          '#36A2EB', // Groceries
-          '#6C63FF', // Dining Out
-          '#FF6384', // Fuel
-          '#FF9F40', // Utilities
-          '#FFCD56', // Travel
-          '#4BC0C0', // Health
-          '#9966FF', // Education
-          '#C9CBCF', // Savings
+          "#36A2EB", "#6C63FF", "#FF6384", "#FF9F40", "#FFCD56",
+          "#4BC0C0", "#9966FF", "#C9CBCF"
         ],
-        borderColor: '#ffffff',
+        borderColor: "#ffffff",
         borderWidth: 4,
         hoverOffset: 4,
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '75%',
-    plugins: {
-      legend: {
-        position: 'right',
-        labels: {
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 20,
-        },
-      },
-    },
-  };
-
   return (
     <div className="relative h-64 w-full flex items-center justify-center">
-      <Doughnut data={data} options={options} />
-      <div className="absolute flex items-center justify-center flex-col pointer-events-none">
-        {/* <span className="text-3xl font-bold text-gray-800">193100</span> */}
-      </div>
+      <Doughnut data={data} options={{ responsive: true, maintainAspectRatio: false, cutout: "75%" }} />
     </div>
   );
 };

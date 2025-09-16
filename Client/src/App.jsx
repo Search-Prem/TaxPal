@@ -1,4 +1,9 @@
-import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// Pages
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Forgot from "./pages/Forgot.jsx";
@@ -7,102 +12,161 @@ import Features from "./pages/Features.jsx";
 import Pricing from "./pages/Pricing.jsx";
 import Support from "./pages/Support.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
-import Logs from "./pages/Logs.jsx"; // ✅ added
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Logs from "./pages/Logs.jsx";
+import Budgeting from "./pages/Budgeting.jsx";
+import TaxEstimator from "./pages/TaxEstimator.jsx";
+import Report from "./pages/Report.jsx";
+import Category from "./pages/Category.jsx";
+
+// Components
+import Header from "./components/Header.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 
-// ✅ Navbar Component
-function Navbar() {
-  const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("token"); // check if token exists
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
+
+  useEffect(() => {
+    const syncAuth = () => {
+      setIsAuthenticated(!!localStorage.getItem("token"));
+    };
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // clear token
-    navigate("/"); // back to login
+    localStorage.removeItem("token");
+    localStorage.removeItem("email");
+    localStorage.removeItem("name");
+    setIsAuthenticated(false);
+    window.dispatchEvent(new Event("storage"));
   };
 
-  return (
-    <div className="w-full border-b bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-600 text-white">
-            🧮
-          </span>
-          <span className="text-lg font-semibold">TaxPal</span>
-        </Link>
+  // 🔑 Auto logout on 401
+  const handleAuthError = () => {
+    handleLogout();
+  };
 
-        <div className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-          <Link to="/features" className="hover:text-gray-900">
-            Features
-          </Link>
-          <Link to="/pricing" className="hover:text-gray-900">
-            Pricing
-          </Link>
-          <Link to="/support" className="hover:text-gray-900">
-            Support
-          </Link>
-
-          {/* ✅ Only show Logout after login */}
-          {isLoggedIn && (
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition"
-            >
-              Logout
-            </button>
-          )}
-        </div>
-      </div>
+  // ✅ Layout for private pages (Header + Sidebar + Content)
+  const PrivateLayout = ({ children }) => (
+    <div className="flex min-h-screen bg-gray-100 pt-16">
+      <Sidebar onAuthError={handleAuthError} />
+      <main className="flex-1 ml-56 p-6">{children}</main>
     </div>
   );
-}
 
-// ✅ Main App Component
-export default function App() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Header isAuthenticated={isAuthenticated} onLogout={handleLogout} />
 
-      {/* Routes */}
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* Public routes */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Login setIsAuthenticated={setIsAuthenticated} />
+            )
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />
+          }
+        />
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/reset" element={<Reset />} />
-
-        {/* Dashboard layout wrapper */}
-        <Route
-          path="/dashboard"
-          element={
-            <div className="flex h-screen bg-gray-100 font-sans">
-              <Sidebar />
-              <main className="flex-1 p-6 md:p-8 lg:p-10">
-                <Dashboard />
-              </main>
-            </div>
-          }
-        />
-
-        {/* ✅ Logs route with same layout */}
-        <Route
-          path="/logs"
-          element={
-            <div className="flex h-screen bg-gray-100 font-sans">
-              <Sidebar />
-              <main className="flex-1 p-6 md:p-8 lg:p-10">
-                <Logs />
-              </main>
-            </div>
-          }
-        />
-
         <Route path="/features" element={<Features />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/support" element={<Support />} />
+
+        {/* Private routes */}
+        <Route
+          path="/dashboard"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <Dashboard onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/logs"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <Logs onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/budgeting"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <Budgeting onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/tax-estimator"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <TaxEstimator onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/category"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <Category onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/report"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <Report onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={
+            <Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />
+          }
+        />
       </Routes>
 
-      {/* Toast Notifications */}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
