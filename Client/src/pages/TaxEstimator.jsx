@@ -3,6 +3,24 @@ import { FaUniversity, FaReceipt } from "react-icons/fa";
 import { FiPercent } from "react-icons/fi";
 import { BsFillFileEarmarkTextFill } from "react-icons/bs";
 
+// Country-specific tax rate logic
+function getTaxRate(region, status) {
+  
+  if (region === "India") {
+    return status === "Single" ? 25 : 20;
+  }
+  if (region === "United States") {
+    return status === "Single" ? 22 : 12;
+  }
+  if (region === "United Kingdom") {
+    return status === "Single" ? 20 : 15;
+  }
+  if (region === "Australia") {
+    return status === "Single" ? 19 : 17;
+  }
+  return 25; // assume to be default
+}
+
 export default function TaxEstimator() {
   const [region, setRegion] = useState("India");
   const [status, setStatus] = useState("Single");
@@ -13,8 +31,8 @@ export default function TaxEstimator() {
   const incomeNum = parseFloat(income) || 0;
   const deductionsNum = parseFloat(deductions) || 0;
 
-  // Simple tax rate logic (example: 25% flat rate for demo)
-  const taxRate = 25;
+  // Use country-specific tax rate
+  const taxRate = getTaxRate(region, status);
   const taxableIncome = Math.max(incomeNum - deductionsNum, 0);
   const estimatedTax = (taxableIncome * taxRate) / 100;
 
