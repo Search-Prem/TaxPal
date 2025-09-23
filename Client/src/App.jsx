@@ -17,6 +17,7 @@ import Budgeting from "./pages/Budgeting.jsx";
 import TaxEstimator from "./pages/TaxEstimator.jsx";
 import Report from "./pages/Report.jsx";
 import Category from "./pages/Category.jsx";
+import TaxCalendar from "./pages/TaxCalendar.jsx";
 
 // Components
 import Header from "./components/Header.jsx";
@@ -151,6 +152,18 @@ export default function App() {
             isAuthenticated ? (
               <PrivateLayout>
                 <Report onAuthError={handleAuthError} />
+              </PrivateLayout>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/tax-calendar"
+          element={
+            isAuthenticated ? (
+              <PrivateLayout>
+                <TaxCalendar onAuthError={handleAuthError} />
               </PrivateLayout>
             ) : (
               <Navigate to="/" replace />

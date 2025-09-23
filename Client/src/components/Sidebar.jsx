@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FaTachometerAlt, FaFileInvoice, FaBook, FaCalculator, FaChartBar } from "react-icons/fa";
+import { FaTachometerAlt, FaFileInvoice, FaBook, FaCalculator, FaChartBar, FaCalendarAlt } from "react-icons/fa";
 
 export default function Sidebar({ categories, refreshTransactions }) {
   const location = useLocation();
@@ -21,6 +21,7 @@ export default function Sidebar({ categories, refreshTransactions }) {
     { to: "/budgeting", label: "Budgeting", icon: <FaBook /> },
     { to: "/tax-estimator", label: "Tax Estimator", icon: <FaCalculator /> },
     { to: "/report", label: "Report", icon: <FaChartBar /> },
+    { to: "/tax-calendar", label: "Tax Calendar", icon: <FaCalendarAlt /> }, // ✅ New Tax Calendar link
   ];
 
   // Handle input change

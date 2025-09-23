@@ -99,7 +99,8 @@ export default function TaxEstimator() {
   const closeNotification = () => setNotification(null);
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
       <h1 className="text-2xl font-bold text-gray-800">Tax Estimation</h1>
       <p className="text-gray-500">
         Estimate your Tax Liabilities based on your financial data and chosen profile.
