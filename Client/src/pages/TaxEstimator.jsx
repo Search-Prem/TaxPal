@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUniversity, FaReceipt } from "react-icons/fa";
+import { FaUniversity, FaReceipt, FaTimes } from "react-icons/fa";
 import { FiPercent } from "react-icons/fi";
 import { BsFillFileEarmarkTextFill } from "react-icons/bs";
 
@@ -54,8 +54,9 @@ export default function TaxEstimator() {
   const [status, setStatus] = useState("Single");
   const [income, setIncome] = useState("");
   const [deductions, setDeductions] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [notification, setNotification] = useState(null); // <-- notification state
 
-  // ensure valid numbers
   const incomeNum = isNaN(parseFloat(income)) ? 0 : parseFloat(income);
   const deductionsNum = isNaN(parseFloat(deductions)) ? 0 : parseFloat(deductions);
 
@@ -64,6 +65,38 @@ export default function TaxEstimator() {
 
   const effectiveRate =
     taxableIncome > 0 ? ((estimatedTax / taxableIncome) * 100).toFixed(1) : 0;
+
+  const handleRecord = () => setShowModal(true);
+
+  const confirmRecord = async () => {
+    try {
+      const payload = {
+        annualIncome: incomeNum,
+        estimatedTax: estimatedTax,
+        region: region,
+        status: status
+      };
+
+      const response = await fetch("/api/record-income", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Failed to record income");
+
+      setShowModal(false);
+      setNotification({ type: "success", message: "Income and tax recorded successfully!" }); // <-- notification instead of alert
+    } catch (error) {
+      console.error(error);
+      setNotification({ type: "error", message: "Error recording income. Try again." }); // <-- notification
+    }
+  };
+
+  const closeModal = () => setShowModal(false);
+  const closeNotification = () => setNotification(null);
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
@@ -107,7 +140,7 @@ export default function TaxEstimator() {
       </div>
 
       {/* Inputs */}
-      <div className="bg-white p-6 rounded-xl shadow-md">
+      <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
         <h2 className="text-lg font-semibold text-gray-700 mb-4">Enter Your Financials</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -134,7 +167,55 @@ export default function TaxEstimator() {
             />
           </div>
         </div>
+
+        {/* Record Button */}
+        <button
+          onClick={handleRecord}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Record
+        </button>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center relative">
+            <FaTimes
+              className="absolute top-3 right-3 cursor-pointer text-gray-500"
+              onClick={closeModal}
+            />
+            <h3 className="text-lg font-semibold mb-4">Confirmation</h3>
+            <p className="mb-6">Record this as my annual income?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRecord}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Notification */}
+      {notification && (
+        <div
+          className={`fixed top-5 right-5 p-4 rounded shadow-md text-white ${
+            notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          } flex items-center gap-2 z-50`}
+        >
+          <FaTimes className="cursor-pointer" onClick={closeNotification} />
+          {notification.message}
+        </div>
+      )}
 
       {/* Tax Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
