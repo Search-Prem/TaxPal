@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import authRoutes from "./routes/authRoutes.js";
 import transactionsRouter from "./routes/TransRoute.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
+import taxRoutes from "./routes/taxRoutes.js";
 
 
 dotenv.config();
@@ -13,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/transactions", transactionsRouter);
+app.use("/taxRoutes", taxRoutes);
 
 //  Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
