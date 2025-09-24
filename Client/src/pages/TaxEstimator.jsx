@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaUniversity, FaReceipt, FaTimes } from "react-icons/fa";
 import { FiPercent } from "react-icons/fi";
 import { BsFillFileEarmarkTextFill } from "react-icons/bs";
@@ -55,94 +55,59 @@ export default function TaxEstimator() {
   const [income, setIncome] = useState("");
   const [deductions, setDeductions] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [notification, setNotification] = useState(null);
-  const [existingRecord, setExistingRecord] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-
-  const token = localStorage.getItem("token");
+  const [notification, setNotification] = useState(null); // <-- notification state
+  const [existingRecord, setExistingRecord] = useState(null); // <-- new
+  const [showEditModal, setShowEditModal] = useState(false); 
 
   const incomeNum = isNaN(parseFloat(income)) ? 0 : parseFloat(income);
   const deductionsNum = isNaN(parseFloat(deductions)) ? 0 : parseFloat(deductions);
+
   const taxableIncome = Math.max(incomeNum - deductionsNum, 0);
   const estimatedTax = calculateTax(region, taxableIncome);
-  const effectiveRate = taxableIncome > 0 ? ((estimatedTax / taxableIncome) * 100).toFixed(1) : 0;
 
-  // Fetch existing record on mount
-  useEffect(() => {
-    const fetchExistingRecord = async () => {
-      try {
-        const res = await fetch("http://localhost:5001/taxRoutes", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const records = await res.json();
-          if (records.length > 0) {
-            setExistingRecord(records[0]); // assume only 1 record per user
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching existing record:", error);
-      }
-    };
-    fetchExistingRecord();
-  }, [token]);
+  const effectiveRate =
+    taxableIncome > 0 ? ((estimatedTax / taxableIncome) * 100).toFixed(1) : 0;
 
-  const handleRecord = () => {
-    if (existingRecord) {
-      setShowEditModal(true);
-    } else {
-      setShowModal(true);
-    }
-  };
-
-  // Prefill form for editing
-  const handleEdit = () => {
-    setIncome(existingRecord.annualIncome);
-    setDeductions(existingRecord.deductions);
-    setRegion(existingRecord.region);
-    setStatus(existingRecord.status);
-    setShowEditModal(false);
-    setShowModal(true);
-  };
+  const handleRecord = () => setShowModal(true);
+  const token = localStorage.getItem("token");
 
   const confirmRecord = async () => {
     try {
       const payload = {
         annualIncome: incomeNum,
-        deductions: deductionsNum,
-        taxableIncome: taxableIncome,
-        estimatedQuarterlyTaxes: estimatedTax / 4,
-        estimatedTax: estimatedTax,
-        region: region,
-        status: status
+      deductions: deductionsNum,
+      taxableIncome: taxableIncome, // <-- add this
+      estimatedQuarterlyTaxes: estimatedTax / 4, // <-- add this
+      estimatedTax: estimatedTax,
+      region: region,
+      status: status
       };
 
       const response = await fetch("http://localhost:5001/taxRoutes", {
-        method: "POST", // You can change to PATCH for editing existing
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`, // very important
+  },
+  body: JSON.stringify(payload),
+});
 
       if (!response.ok) throw new Error("Failed to record income");
 
       setShowModal(false);
-      setNotification({ type: "success", message: "Income and tax recorded successfully!" });
-      setExistingRecord(payload); // update existing record locally
+      setNotification({ type: "success", message: "Income and tax recorded successfully!" }); // <-- notification instead of alert
     } catch (error) {
       console.error(error);
-      setNotification({ type: "error", message: "Error recording income. Try again." });
+      setNotification({ type: "error", message: "Error recording income. Try again." }); // <-- notification
     }
   };
 
   const closeModal = () => setShowModal(false);
   const closeNotification = () => setNotification(null);
-  const closeEditModal = () => setShowEditModal(false);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
       <h1 className="text-2xl font-bold text-gray-800">Tax Estimation</h1>
       <p className="text-gray-500">
         Estimate your Tax Liabilities based on your financial data and chosen profile.
@@ -165,6 +130,7 @@ export default function TaxEstimator() {
               <option>Australia</option>
             </select>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Filing Status</label>
             <select
@@ -196,6 +162,7 @@ export default function TaxEstimator() {
               className="mt-1 w-full border px-3 py-2 rounded-md"
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Total Deductions (₹)</label>
             <input
@@ -208,6 +175,8 @@ export default function TaxEstimator() {
             />
           </div>
         </div>
+
+        {/* Record Button */}
         <button
           onClick={handleRecord}
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
@@ -216,7 +185,7 @@ export default function TaxEstimator() {
         </button>
       </div>
 
-      {/* Record Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
           <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center relative">
@@ -238,34 +207,6 @@ export default function TaxEstimator() {
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center relative">
-            <FaTimes
-              className="absolute top-3 right-3 cursor-pointer text-gray-500"
-              onClick={closeEditModal}
-            />
-            <h3 className="text-lg font-semibold mb-4">Tax Estimator Exists</h3>
-            <p className="mb-6">You already have a recorded tax estimator. Do you want to edit it?</p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={closeEditModal}
-                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEdit}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                Edit
               </button>
             </div>
           </div>
