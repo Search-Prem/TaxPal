@@ -20,8 +20,8 @@ export default function Sidebar({ categories, refreshTransactions }) {
     { to: "/logs", label: "Logs", icon: <FaFileInvoice /> },
     { to: "/budgeting", label: "Budgeting", icon: <FaBook /> },
     { to: "/tax-estimator", label: "Tax Estimator", icon: <FaCalculator /> },
-    { to: "/report", label: "Report", icon: <FaChartBar /> },
     { to: "/tax-calendar", label: "Tax Calendar", icon: <FaCalendarAlt /> }, // ✅ New Tax Calendar link
+    { to: "/report", label: "Report", icon: <FaChartBar /> },
   ];
 
   // Handle input change
