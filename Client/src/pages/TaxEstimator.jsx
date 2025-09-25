@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUniversity, FaReceipt, FaTimes } from "react-icons/fa";
 import { FiPercent } from "react-icons/fi";
 import { BsFillFileEarmarkTextFill } from "react-icons/bs";
@@ -55,54 +55,88 @@ export default function TaxEstimator() {
   const [income, setIncome] = useState("");
   const [deductions, setDeductions] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [notification, setNotification] = useState(null); // <-- notification state
-  const [existingRecord, setExistingRecord] = useState(null); // <-- new
-  const [showEditModal, setShowEditModal] = useState(false); 
+  const [notification, setNotification] = useState(null);
+  const [existingRecord, setExistingRecord] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const incomeNum = isNaN(parseFloat(income)) ? 0 : parseFloat(income);
   const deductionsNum = isNaN(parseFloat(deductions)) ? 0 : parseFloat(deductions);
-
   const taxableIncome = Math.max(incomeNum - deductionsNum, 0);
   const estimatedTax = calculateTax(region, taxableIncome);
-
   const effectiveRate =
     taxableIncome > 0 ? ((estimatedTax / taxableIncome) * 100).toFixed(1) : 0;
 
-  const handleRecord = () => setShowModal(true);
   const token = localStorage.getItem("token");
 
-  const confirmRecord = async () => {
+  // ✅ Re-fetch records when user clicks "Record"
+  const handleRecord = async () => {
+    if (!token) {
+      setNotification({ type: "error", message: "User not authenticated" });
+      return;
+    }
+    try {
+      const res = await fetch("http://localhost:5001/taxRoutes", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch records");
+      const data = await res.json();
+      // ✅ Check if there is at least one record in DB
+      if (Array.isArray(data) && data.length > 0) {
+        setExistingRecord(data[0]); // store the first existing record
+        setShowEditModal(true);
+        return;
+      }
+    } catch (err) {
+      console.error("Error checking records:", err);
+      setNotification({ type: "error", message: "Error checking existing records" });
+      return;
+    }
+    setShowModal(true);
+  };
+
+  const confirmRecord = async (update = false) => {
     try {
       const payload = {
         annualIncome: incomeNum,
-      deductions: deductionsNum,
-      taxableIncome: taxableIncome, // <-- add this
-      estimatedQuarterlyTaxes: estimatedTax / 4, // <-- add this
-      estimatedTax: estimatedTax,
-      region: region,
-      status: status
+        deductions: deductionsNum,
+        taxableIncome,
+        estimatedQuarterlyTaxes: estimatedTax / 4,
+        estimatedTax,
+        region,
+        status,
       };
 
-      const response = await fetch("http://localhost:5001/taxRoutes", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`, // very important
-  },
-  body: JSON.stringify(payload),
-});
+      const url = update && existingRecord?._id
+        ? `http://localhost:5001/taxRoutes/${existingRecord._id}`
+        : "http://localhost:5001/taxRoutes";
+      const method = update ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) throw new Error("Failed to record income");
 
       setShowModal(false);
-      setNotification({ type: "success", message: "Income and tax recorded successfully!" }); // <-- notification instead of alert
+      setShowEditModal(false);
+      setNotification({
+        type: "success",
+        message: update ? "Income updated successfully!" : "Income recorded successfully!",
+      });
+      setExistingRecord(payload);
     } catch (error) {
       console.error(error);
-      setNotification({ type: "error", message: "Error recording income. Try again." }); // <-- notification
+      setNotification({ type: "error", message: "Error recording income. Try again." });
     }
   };
 
   const closeModal = () => setShowModal(false);
+  const closeEditModal = () => setShowEditModal(false);
   const closeNotification = () => setNotification(null);
 
   return (
@@ -185,7 +219,7 @@ export default function TaxEstimator() {
         </button>
       </div>
 
-      {/* Modal */}
+      {/* Modal - New Record Confirmation */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
           <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center relative">
@@ -203,10 +237,41 @@ export default function TaxEstimator() {
                 Cancel
               </button>
               <button
-                onClick={confirmRecord}
+                onClick={() => confirmRecord(false)}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal - Update Existing Record */}
+      {showEditModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-96 text-center relative">
+            <FaTimes
+              className="absolute top-3 right-3 cursor-pointer text-gray-500"
+              onClick={closeEditModal}
+            />
+            <h3 className="text-lg font-semibold mb-4">Existing Record Found</h3>
+            <p className="mb-6">
+              You already have an annual income recorded. Do you want to change
+              that into this or cancel?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={closeEditModal}
+                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => confirmRecord(true)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                Update
               </button>
             </div>
           </div>

@@ -137,7 +137,7 @@ export default function Report() {
                 return (
                   <div
                     key={idx}
-                    className="border rounded-2xl shadow-md p-4 space-y-3"
+                    className="border bg-white rounded-2xl shadow-md p-4 space-y-3"
                   >
                     <h3 className="text-md font-semibold">{item.month}</h3>
                     <p className="text-gray-500 text-sm">Financial overview</p>
@@ -185,7 +185,7 @@ export default function Report() {
                 return (
                   <div
                     key={idx}
-                    className="border rounded-2xl shadow-md p-4 space-y-3"
+                    className="border bg-white rounded-2xl shadow-md p-4 space-y-3"
                   >
                     <h3 className="text-md font-semibold">{item.quarter}</h3>
                     <p className="text-gray-500 text-sm">Financial overview</p>
