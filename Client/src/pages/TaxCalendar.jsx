@@ -120,16 +120,16 @@ export default function TaxCalendar() {
 
   // --- Badge style for PAYMENT only
   const badgeStyle = (ev) => {
-    if (!taxPayment) return "border-yellow-500 text-yellow-600";
+  if (!taxPayment) return "border-yellow-600 bg-yellow-500 text-white";
 
-    const isPaid = taxPayment[ev.quarter];
-    const isLate =
-      new Date() > ev.dueDate && !isPaid; // current date passed and not paid
+  const isPaid = taxPayment[ev.quarter];
+  const isLate = new Date() > ev.dueDate && !isPaid;
 
-    if (isPaid) return "border-green-500 text-green-600";
-    if (isLate) return "border-red-500 text-red-600";
-    return "border-orange-500 text-orange-600";
-  };
+  if (isPaid) return "border-green-600 bg-green-500 text-white";
+  if (isLate) return "border-red-600 bg-red-500 text-white";
+  return "border-orange-600 bg-orange-500 text-white";
+};
+
 
   // --- Handle payment confirmation
   const confirmPayment = async () => {
@@ -204,7 +204,7 @@ export default function TaxCalendar() {
                             setSelectedQuarter(ev.quarter);
                             setShowModal(true);
                           }}
-                          className={`border-2 px-3 py-1 rounded-full text-sm font-semibold bg-white ${badgeStyle(
+                          className={`border-2 px-3 py-1 rounded-full text-sm font-semibold  ${badgeStyle(
                             ev
                           )}`}
                         >
