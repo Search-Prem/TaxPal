@@ -1,11 +1,143 @@
 import { useState, useEffect } from "react";
-import { FaUser, FaBell, FaList, FaEdit, FaTimes } from "react-icons/fa";
+import { FaUser, FaBell, FaList, FaEdit, FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast } from "react-toastify";
+
+function ProfileSection() {
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("profileSettings"));
+    if (saved) {
+      setForm({ name: saved.name || "", email: saved.email || "", password: "" });
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = () => {
+    const toSave = { name: form.name, email: form.email };
+    localStorage.setItem("profileSettings", JSON.stringify(toSave));
+    toast.success("Profile saved!");
+  };
+
+  return (
+    <div className="bg-white p-8 rounded shadow border w-full h-full">
+
+      <h2 className="text-xl font-bold mb-2">Profile Settings</h2>
+      <p className="text-gray-600 mb-4">Update your personal information.</p>
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium">Name</label>
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-1/2 border rounded px-3 py-2"
+
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium">Email (readonly)</label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            readOnly
+             className="w-full max-w-sm border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+          />
+        </div>
+        <div className="relative">
+          <label className="block text-sm font-medium mb-1">Password</label>
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            className="w-full max-w-sm border rounded px-3 py-2 pr-10"
+            placeholder="Enter new password"
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-9 text-gray-500"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            tabIndex={-1}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+      </div>
+
+      <button
+        onClick={handleSave}
+        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Save Profile
+      </button>
+    </div>
+  );
+}
+
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState({
+    email: true,
+    sms: false,
+    push: true,
+  });
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("notificationSettings"));
+    if (saved) setPrefs(saved);
+  }, []);
+
+  const toggle = (key) => {
+    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSave = () => {
+    localStorage.setItem("notificationSettings", JSON.stringify(prefs));
+    toast.success("Notification settings saved!");
+  };
+
+  return (
+    <div className="bg-white p-6 rounded shadow border">
+      <h2 className="text-xl font-bold mb-2">Notification Settings</h2>
+      <p className="text-gray-600 mb-4">Manage your notification preferences.</p>
+
+      <div className="space-y-4">
+        <label className="flex items-center justify-between">
+          <span>Email notifications</span>
+          <input type="checkbox" checked={prefs.email} onChange={() => toggle("email")} />
+        </label>
+        <label className="flex items-center justify-between">
+          <span>SMS notifications</span>
+          <input type="checkbox" checked={prefs.sms} onChange={() => toggle("sms")} />
+        </label>
+        <label className="flex items-center justify-between">
+          <span>Push notifications</span>
+          <input type="checkbox" checked={prefs.push} onChange={() => toggle("push")} />
+        </label>
+      </div>
+
+      <button
+        onClick={handleSave}
+        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Save Notifications
+      </button>
+    </div>
+  );
+}
 
 export default function Category() {
   const [activeTab, setActiveTab] = useState("category");
   const [activeSection, setActiveSection] = useState("income");
 
-  // Load categories from localStorage OR use defaults
   const [incomeCategories, setIncomeCategories] = useState(() => {
     return JSON.parse(localStorage.getItem("incomeCategories")) || [
       { name: "Salary", color: "bg-green-500" },
@@ -22,7 +154,6 @@ export default function Category() {
     ];
   });
 
-  // Save categories to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("incomeCategories", JSON.stringify(incomeCategories));
   }, [incomeCategories]);
@@ -31,14 +162,12 @@ export default function Category() {
     localStorage.setItem("expenseCategories", JSON.stringify(expenseCategories));
   }, [expenseCategories]);
 
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [newType, setNewType] = useState("income");
-  const [editIndex, setEditIndex] = useState(null); // if null → Add, else Edit
+  const [editIndex, setEditIndex] = useState(null);
   const [editType, setEditType] = useState(null);
 
-  // Open modal for Add
   const handleAddClick = () => {
     setNewCategory("");
     setNewType("income");
@@ -47,7 +176,6 @@ export default function Category() {
     setShowModal(true);
   };
 
-  // Open modal for Edit
   const handleEditClick = (cat, index, type) => {
     setNewCategory(cat.name);
     setNewType(type);
@@ -56,7 +184,6 @@ export default function Category() {
     setShowModal(true);
   };
 
-  // Save (Add or Edit)
   const handleSaveCategory = () => {
     if (!newCategory.trim()) return;
 
@@ -67,11 +194,9 @@ export default function Category() {
       "bg-cyan-500",
       "bg-lime-500",
     ];
-    const randomColor =
-      colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
 
     if (editIndex !== null) {
-      // Editing existing category
       if (editType === "income") {
         const updated = [...incomeCategories];
         updated[editIndex] = { ...updated[editIndex], name: newCategory };
@@ -82,17 +207,10 @@ export default function Category() {
         setExpenseCategories(updated);
       }
     } else {
-      // Adding new category
       if (newType === "income") {
-        setIncomeCategories([
-          ...incomeCategories,
-          { name: newCategory, color: randomColor },
-        ]);
+        setIncomeCategories([...incomeCategories, { name: newCategory, color: randomColor }]);
       } else {
-        setExpenseCategories([
-          ...expenseCategories,
-          { name: newCategory, color: randomColor },
-        ]);
+        setExpenseCategories([...expenseCategories, { name: newCategory, color: randomColor }]);
       }
     }
 
@@ -105,23 +223,16 @@ export default function Category() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Settings Header */}
       <div className="bg-white shadow p-4 border-b">
         <h1 className="text-xl font-bold text-gray-700">Settings</h1>
-        <p className="text-gray-500 text-sm">
-          Manage your account settings and preferences
-        </p>
+        <p className="text-gray-500 text-sm">Manage your account settings and preferences</p>
       </div>
 
-      {/* Layout */}
       <div className="flex">
-        {/* Sidebar */}
         <div className="w-56 bg-white shadow-md border-r min-h-[calc(100vh-80px)] p-4">
           <div
             className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
-              activeTab === "profile"
-                ? "bg-gray-100 border-l-4 border-blue-600"
-                : "hover:bg-gray-50"
+              activeTab === "profile" ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
             }`}
             onClick={() => setActiveTab("profile")}
           >
@@ -130,9 +241,7 @@ export default function Category() {
           </div>
           <div
             className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
-              activeTab === "notifications"
-                ? "bg-gray-100 border-l-4 border-blue-600"
-                : "hover:bg-gray-50"
+              activeTab === "notifications" ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
             }`}
             onClick={() => setActiveTab("notifications")}
           >
@@ -141,9 +250,7 @@ export default function Category() {
           </div>
           <div
             className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
-              activeTab === "category"
-                ? "bg-gray-100 border-l-4 border-blue-600"
-                : "hover:bg-gray-50"
+              activeTab === "category" ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
             }`}
             onClick={() => setActiveTab("category")}
           >
@@ -151,42 +258,20 @@ export default function Category() {
             <span className="text-gray-700">Category</span>
           </div>
         </div>
-        
-        {/* Content */}
+
         <div className="flex-1 p-6">
-          {/* Profile */}
-          {activeTab === "profile" && (
-            <div className="bg-white p-6 rounded shadow border">
-              <h2 className="text-xl font-bold mb-2">Profile Settings</h2>
-              <p className="text-gray-600">
-                Update your personal information here.
-              </p>
-            </div>
-          )}
+          {activeTab === "profile" && <ProfileSection />}
+          {activeTab === "notifications" && <NotificationsSection />}
 
-          {/* Notifications */}
-          {activeTab === "notifications" && (
-            <div className="bg-white p-6 rounded shadow border">
-              <h2 className="text-xl font-bold mb-2">Notification Settings</h2>
-              <p className="text-gray-600">
-                Manage your notification preferences.
-              </p>
-            </div>
-          )}
-
-          {/* Category */}
           {activeTab === "category" && (
             <div className="bg-white p-6 rounded shadow border">
               <h2 className="text-xl font-bold mb-4">Category Management</h2>
 
-              {/* Toggle */}
               <div className="flex space-x-6 mb-4 border-b pb-2">
                 <button
                   onClick={() => setActiveSection("income")}
                   className={`${
-                    activeSection === "income"
-                      ? "border-b-2 border-blue-600 font-semibold"
-                      : "text-gray-500"
+                    activeSection === "income" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
                   }`}
                 >
                   Income Categories
@@ -194,16 +279,13 @@ export default function Category() {
                 <button
                   onClick={() => setActiveSection("expenses")}
                   className={`${
-                    activeSection === "expenses"
-                      ? "border-b-2 border-blue-600 font-semibold"
-                      : "text-gray-500"
+                    activeSection === "expenses" ? "border-b-2 border-blue-600 font-semibold" : "text-gray-500"
                   }`}
                 >
                   Expenses Categories
                 </button>
               </div>
 
-              {/* Category List */}
               <div className="space-y-2">
                 {activeSection === "income" &&
                   incomeCategories.map((cat, i) => (
@@ -212,23 +294,15 @@ export default function Category() {
                       className="flex justify-between items-center bg-gray-50 p-2 rounded border"
                     >
                       <div className="flex items-center space-x-2">
-                        <span
-                          className={`w-3 h-3 rounded-full ${cat.color}`}
-                        ></span>
+                        <span className={`w-3 h-3 rounded-full ${cat.color}`}></span>
                         <span>{cat.name}</span>
                       </div>
                       <div className="space-x-2">
-                        <button
-                          onClick={() => handleEditClick(cat, i, "income")}
-                        >
+                        <button onClick={() => handleEditClick(cat, i, "income")}>
                           <FaEdit className="text-black cursor-pointer" />
                         </button>
                         <button
-                          onClick={() =>
-                            setIncomeCategories(
-                              incomeCategories.filter((_, idx) => idx !== i)
-                            )
-                          }
+                          onClick={() => setIncomeCategories(incomeCategories.filter((_, idx) => idx !== i))}
                         >
                           <FaTimes className="text-black cursor-pointer" />
                         </button>
@@ -243,23 +317,15 @@ export default function Category() {
                       className="flex justify-between items-center bg-gray-50 p-2 rounded border"
                     >
                       <div className="flex items-center space-x-2">
-                        <span
-                          className={`w-3 h-3 rounded-full ${cat.color}`}
-                        ></span>
+                        <span className={`w-3 h-3 rounded-full ${cat.color}`}></span>
                         <span>{cat.name}</span>
                       </div>
                       <div className="space-x-2">
-                        <button
-                          onClick={() => handleEditClick(cat, i, "expenses")}
-                        >
+                        <button onClick={() => handleEditClick(cat, i, "expenses")}>
                           <FaEdit className="text-black cursor-pointer" />
                         </button>
                         <button
-                          onClick={() =>
-                            setExpenseCategories(
-                              expenseCategories.filter((_, idx) => idx !== i)
-                            )
-                          }
+                          onClick={() => setExpenseCategories(expenseCategories.filter((_, idx) => idx !== i))}
                         >
                           <FaTimes className="text-black cursor-pointer" />
                         </button>
@@ -268,7 +334,6 @@ export default function Category() {
                   ))}
               </div>
 
-              {/* Add Category Button */}
               <div className="mt-6">
                 <button
                   onClick={handleAddClick}
@@ -282,7 +347,6 @@ export default function Category() {
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded shadow-lg p-6 w-96">
@@ -290,7 +354,6 @@ export default function Category() {
               {editIndex !== null ? "Edit Category" : "Add New Category"}
             </h3>
 
-            {/* Category Name */}
             <input
               type="text"
               placeholder="Category Name"
@@ -299,18 +362,16 @@ export default function Category() {
               className="w-full border rounded px-3 py-2 mb-4"
             />
 
-            {/* Category Type */}
             <select
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
               className="w-full border rounded px-3 py-2 mb-4"
-              disabled={editIndex !== null} // prevent changing type while editing
+              disabled={editIndex !== null}
             >
               <option value="income">Income</option>
               <option value="expenses">Expenses</option>
             </select>
 
-            {/* Buttons */}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowModal(false)}

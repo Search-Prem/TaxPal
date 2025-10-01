@@ -1,11 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import logo from './logo.png';
+
 export default function Header({ isAuthenticated, onLogout }) {
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const dropdownRef = useRef(null);
+
+  // ✅ New: state for dynamic display name
+  const [displayName, setDisplayName] = useState("User");
 
   // ✅ Close dropdown when clicking outside
   useEffect(() => {
@@ -22,10 +26,24 @@ export default function Header({ isAuthenticated, onLogout }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
 
-  const storedName = localStorage.getItem("name");
-  const storedEmail = localStorage.getItem("email");
-  const displayName =
-    storedName || (storedEmail ? storedEmail.split("@")[0] : "User");
+  // ✅ Load profile name/email from profileSettings (instead of "name"/"email")
+  useEffect(() => {
+    const updateProfile = () => {
+      const saved = JSON.parse(localStorage.getItem("profileSettings"));
+      if (saved?.name) {
+        setDisplayName(saved.name);
+      } else if (saved?.email) {
+        setDisplayName(saved.email.split("@")[0]);
+      } else {
+        setDisplayName("User");
+      }
+    };
+
+    updateProfile(); // run on mount
+    window.addEventListener("profile-updated", updateProfile); // live update after save
+
+    return () => window.removeEventListener("profile-updated", updateProfile);
+  }, []);
 
   return (
     <>
@@ -33,13 +51,13 @@ export default function Header({ isAuthenticated, onLogout }) {
         <div className="flex items-center justify-between px-6 py-3">
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center gap-2">
-          <img
-            src={logo}
-            alt="Logo"
-            className="h-8 w-8"
-          />
-          <span className="text-xl font-bold text-gray-800">TaxPal</span>
-        </Link>
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-8 w-8"
+            />
+            <span className="text-xl font-bold text-gray-800">TaxPal</span>
+          </Link>
 
           {/* Right side */}
           <div className="flex items-center gap-6">
@@ -84,7 +102,7 @@ export default function Header({ isAuthenticated, onLogout }) {
                       className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
                     >
                       <img
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDgp53HKq4fyclYtZdD-0wHVV2YC2rZ0tmGg&s" // add your settings icon path
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDgp53HKq4fyclYtZdD-0wHVV2YC2rZ0tmGg&s"
                         alt="settings"
                         className="w-4 h-4"
                       />
@@ -97,7 +115,7 @@ export default function Header({ isAuthenticated, onLogout }) {
                       className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
                     >
                       <img
-                        src="https://cdn-icons-png.flaticon.com/128/4400/4400629.png" // add your logout icon path
+                        src="https://cdn-icons-png.flaticon.com/128/4400/4400629.png"
                         alt="logout"
                         className="w-4 h-4"
                       />
@@ -105,7 +123,6 @@ export default function Header({ isAuthenticated, onLogout }) {
                     </button>
                   </div>
                 )}
-
               </div>
             )}
           </div>
