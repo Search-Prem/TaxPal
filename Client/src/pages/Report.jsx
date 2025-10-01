@@ -9,27 +9,45 @@ export default function Report() {
   const [activeTab, setActiveTab] = useState("monthly");
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedQuarter, setSelectedQuarter] = useState("");
 
+  // Financial data for full year
   const financialData = [
+    { month: "Jan 2024", income: 120000, expense: 95000 },
+    { month: "Feb 2024", income: 130000, expense: 100000 },
+    { month: "Mar 2024", income: 125000, expense: 98000 },
+    { month: "Apr 2024", income: 140000, expense: 105000 },
+    { month: "May 2024", income: 135000, expense: 102000 },
+    { month: "Jun 2024", income: 128000, expense: 99000 },
     { month: "Jul 2024", income: 125000, expense: 100000 },
     { month: "Aug 2024", income: 125000, expense: 100000 },
     { month: "Sep 2024", income: 125000, expense: 100000 },
     { month: "Oct 2024", income: 125000, expense: 100000 },
     { month: "Nov 2024", income: 125000, expense: 100000 },
-    { month: "Dec 2025", income: 125000, expense: 100000 },
+    { month: "Dec 2024", income: 125000, expense: 100000 },
   ];
 
   const quarterlyData = [
     { quarter: "Q1 2024", income: 375000, expense: 300000 },
-    { quarter: "Q2 2024", income: 390000, expense: 310000 },
-    { quarter: "Q3 2024", income: 400000, expense: 320000 },
-    { quarter: "Q4 2024", income: 410000, expense: 330000 },
+    { quarter: "Q2 2024", income: 403000, expense: 306000 },
+    { quarter: "Q3 2024", income: 375000, expense: 300000 },
+    { quarter: "Q4 2024", income: 375000, expense: 300000 },
   ];
+
+  // Filtered Data
+  const filteredMonthlyData = selectedMonth
+    ? financialData.filter((item) => item.month === selectedMonth)
+    : financialData;
+
+  const filteredQuarterlyData = selectedQuarter
+    ? quarterlyData.filter((item) => item.quarter === selectedQuarter)
+    : quarterlyData;
 
   // PDF Generation
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.setFont("helvetica"); // default font
+    doc.setFont("helvetica");
 
     doc.setFontSize(18);
     doc.text("Annual Financial Report", 14, 20);
@@ -39,7 +57,7 @@ export default function Report() {
     autoTable(doc, {
       startY: 34,
       head: [["Month", "Income", "Expense", "Net Savings"]],
-      body: financialData.map((item) => [
+      body: filteredMonthlyData.map((item) => [
         item.month,
         `$${item.income.toLocaleString()}`,
         `$${item.expense.toLocaleString()}`,
@@ -48,9 +66,9 @@ export default function Report() {
       foot: [
         [
           "TOTAL",
-          `$${financialData.reduce((sum, i) => sum + i.income, 0).toLocaleString()}`,
-          `$${financialData.reduce((sum, i) => sum + i.expense, 0).toLocaleString()}`,
-          `$${financialData.reduce((sum, i) => sum + (i.income - i.expense), 0).toLocaleString()}`,
+          `$${filteredMonthlyData.reduce((sum, i) => sum + i.income, 0).toLocaleString()}`,
+          `$${filteredMonthlyData.reduce((sum, i) => sum + i.expense, 0).toLocaleString()}`,
+          `$${filteredMonthlyData.reduce((sum, i) => sum + (i.income - i.expense), 0).toLocaleString()}`,
         ],
       ],
     });
@@ -60,7 +78,7 @@ export default function Report() {
     autoTable(doc, {
       startY: finalY + 4,
       head: [["Quarter", "Income", "Expense", "Net Savings"]],
-      body: quarterlyData.map((item) => [
+      body: filteredQuarterlyData.map((item) => [
         item.quarter,
         `$${item.income.toLocaleString()}`,
         `$${item.expense.toLocaleString()}`,
@@ -69,9 +87,9 @@ export default function Report() {
       foot: [
         [
           "TOTAL",
-          `$${quarterlyData.reduce((sum, i) => sum + i.income, 0).toLocaleString()}`,
-          `$${quarterlyData.reduce((sum, i) => sum + i.expense, 0).toLocaleString()}`,
-          `$${quarterlyData.reduce((sum, i) => sum + (i.income - i.expense), 0).toLocaleString()}`,
+          `$${filteredQuarterlyData.reduce((sum, i) => sum + i.income, 0).toLocaleString()}`,
+          `$${filteredQuarterlyData.reduce((sum, i) => sum + i.expense, 0).toLocaleString()}`,
+          `$${filteredQuarterlyData.reduce((sum, i) => sum + (i.income - i.expense), 0).toLocaleString()}`,
         ],
       ],
     });
@@ -96,10 +114,13 @@ export default function Report() {
         expense: `$${item.expense.toLocaleString()}`,
         netSavings: `$${(item.income - item.expense).toLocaleString()}`,
       }));
-    const monthlySheet = XLSX.utils.json_to_sheet(addDollar(financialData));
-    const quarterlySheet = XLSX.utils.json_to_sheet(addDollar(quarterlyData));
+
+    const monthlySheet = XLSX.utils.json_to_sheet(filteredMonthlyData.length ? addDollar(filteredMonthlyData) : addDollar(financialData));
+    const quarterlySheet = XLSX.utils.json_to_sheet(filteredQuarterlyData.length ? addDollar(filteredQuarterlyData) : addDollar(quarterlyData));
+
     XLSX.utils.book_append_sheet(wb, monthlySheet, "Monthly");
     XLSX.utils.book_append_sheet(wb, quarterlySheet, "Quarterly");
+
     const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([wbout], { type: "application/octet-stream" }), "Annual_Report.xlsx");
   };
@@ -118,30 +139,74 @@ export default function Report() {
     <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
       <h1 className="text-2xl font-bold">Reports & Export</h1>
 
-      <div className="flex gap-3">
-        <button onClick={downloadPDF} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
-          <FileText className="w-4 h-4" /> Download Annual Report (PDF)
+      {/* Filters */}
+      <div className="flex items-center gap-3">
+        {activeTab === "monthly" && (
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 focus:outline-none"
+          >
+            <option value="" className="text-black">All Months</option>
+            {financialData.map((item) => (
+              <option key={item.month} value={item.month} className="text-black">
+                {item.month}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {activeTab === "quarterly" && (
+          <select
+            value={selectedQuarter}
+            onChange={(e) => setSelectedQuarter(e.target.value)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 focus:outline-none"
+          >
+            <option value="" className="text-black">All Quarters</option>
+            {quarterlyData.map((item) => (
+              <option key={item.quarter} value={item.quarter} className="text-black">
+                {item.quarter}
+              </option>
+            ))}
+          </select>
+        )}
+
+        <button
+          onClick={downloadPDF}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+        >
+          <FileText className="w-4 h-4" /> Download PDF
         </button>
-        <button onClick={downloadExcel} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow">
-          <FileSpreadsheet className="w-4 h-4" /> Download Annual Report (Excel)
+
+        <button
+          onClick={downloadExcel}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+        >
+          <FileSpreadsheet className="w-4 h-4" /> Download Excel
         </button>
       </div>
 
       {/* Tabs */}
       <div className="w-full">
         <div className="grid grid-cols-2 w-1/2 bg-gray-200 rounded-lg p-1">
-          <button onClick={() => setActiveTab("monthly")} className={`px-4 py-2 rounded-md font-medium ${activeTab === "monthly" ? "bg-white shadow" : "text-gray-600"}`}>
+          <button
+            onClick={() => setActiveTab("monthly")}
+            className={`px-4 py-2 rounded-md font-medium ${activeTab === "monthly" ? "bg-white shadow" : "text-gray-600"}`}
+          >
             Monthly Summaries
           </button>
-          <button onClick={() => setActiveTab("quarterly")} className={`px-4 py-2 rounded-md font-medium ${activeTab === "quarterly" ? "bg-white shadow" : "text-gray-600"}`}>
+          <button
+            onClick={() => setActiveTab("quarterly")}
+            className={`px-4 py-2 rounded-md font-medium ${activeTab === "quarterly" ? "bg-white shadow" : "text-gray-600"}`}
+          >
             Quarterly Summaries
           </button>
         </div>
 
-        {/* Monthly Summaries */}
+        {/* Monthly Cards */}
         {activeTab === "monthly" && (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {financialData.map((item, idx) => {
+            {filteredMonthlyData.map((item, idx) => {
               const net = item.income - item.expense;
               return (
                 <div key={idx} className="border bg-white rounded-2xl shadow-md p-4 space-y-3">
@@ -161,10 +226,10 @@ export default function Report() {
           </div>
         )}
 
-        {/* Quarterly Summaries */}
+        {/* Quarterly Cards */}
         {activeTab === "quarterly" && (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {quarterlyData.map((item, idx) => {
+            {filteredQuarterlyData.map((item, idx) => {
               const net = item.income - item.expense;
               return (
                 <div key={idx} className="border bg-white rounded-2xl shadow-md p-4 space-y-3">

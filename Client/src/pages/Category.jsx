@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaUser, FaBell, FaList, FaEdit, FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
 
+// ---------------- Profile Section ----------------
 function ProfileSection() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -13,9 +14,7 @@ function ProfileSection() {
     }
   }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSave = () => {
     const toSave = { name: form.name, email: form.email };
@@ -24,33 +23,33 @@ function ProfileSection() {
   };
 
   return (
-    <div className="bg-white p-8 rounded shadow border w-full h-full">
-
+    <div className="bg-white p-6 rounded shadow border w-full max-w-full">
       <h2 className="text-xl font-bold mb-2">Profile Settings</h2>
       <p className="text-gray-600 mb-4">Update your personal information.</p>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium">Name</label>
+          <label className="block text-sm font-medium mb-1">Name</label>
           <input
             type="text"
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-1/2 border rounded px-3 py-2"
-
+            className="w-full border rounded px-3 py-2"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium">Email (readonly)</label>
+          <label className="block text-sm font-medium mb-1">Email (readonly)</label>
           <input
             type="email"
             name="email"
             value={form.email}
             readOnly
-             className="w-full max-w-sm border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+            className="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
           />
         </div>
+
         <div className="relative">
           <label className="block text-sm font-medium mb-1">Password</label>
           <input
@@ -58,12 +57,12 @@ function ProfileSection() {
             name="password"
             value={form.password}
             onChange={handleChange}
-            className="w-full max-w-sm border rounded px-3 py-2 pr-10"
             placeholder="Enter new password"
+            className="w-full border rounded px-3 py-2 pr-10"
           />
           <button
             type="button"
-            className="absolute right-3 top-9 text-gray-500"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "Hide password" : "Show password"}
             tabIndex={-1}
@@ -83,21 +82,16 @@ function ProfileSection() {
   );
 }
 
+// ---------------- Notifications Section ----------------
 function NotificationsSection() {
-  const [prefs, setPrefs] = useState({
-    email: true,
-    sms: false,
-    push: true,
-  });
+  const [prefs, setPrefs] = useState({ email: true, sms: false, push: true });
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("notificationSettings"));
     if (saved) setPrefs(saved);
   }, []);
 
-  const toggle = (key) => {
-    setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const toggle = (key) => setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const handleSave = () => {
     localStorage.setItem("notificationSettings", JSON.stringify(prefs));
@@ -105,7 +99,7 @@ function NotificationsSection() {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow border">
+    <div className="bg-white p-6 rounded shadow border w-full max-w-full">
       <h2 className="text-xl font-bold mb-2">Notification Settings</h2>
       <p className="text-gray-600 mb-4">Manage your notification preferences.</p>
 
@@ -134,6 +128,7 @@ function NotificationsSection() {
   );
 }
 
+// ---------------- Main Category Component ----------------
 export default function Category() {
   const [activeTab, setActiveTab] = useState("category");
   const [activeSection, setActiveSection] = useState("income");
@@ -187,13 +182,7 @@ export default function Category() {
   const handleSaveCategory = () => {
     if (!newCategory.trim()) return;
 
-    const colorPalette = [
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-teal-500",
-      "bg-cyan-500",
-      "bg-lime-500",
-    ];
+    const colorPalette = ["bg-pink-500", "bg-indigo-500", "bg-teal-500", "bg-cyan-500", "bg-lime-500"];
     const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
 
     if (editIndex !== null) {
@@ -222,51 +211,44 @@ export default function Category() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 w-full">
+      {/* Header */}
       <div className="bg-white shadow p-4 border-b">
         <h1 className="text-xl font-bold text-gray-700">Settings</h1>
         <p className="text-gray-500 text-sm">Manage your account settings and preferences</p>
       </div>
 
-      <div className="flex">
-        <div className="w-56 bg-white shadow-md border-r min-h-[calc(100vh-80px)] p-4">
-          <div
-            className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
-              activeTab === "profile" ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("profile")}
-          >
-            <FaUser className="text-gray-700" />
-            <span className="text-gray-700">Profile</span>
-          </div>
-          <div
-            className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
-              activeTab === "notifications" ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("notifications")}
-          >
-            <FaBell className="text-gray-700" />
-            <span className="text-gray-700">Notifications</span>
-          </div>
-          <div
-            className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
-              activeTab === "category" ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
-            }`}
-            onClick={() => setActiveTab("category")}
-          >
-            <FaList className="text-gray-700" />
-            <span className="text-gray-700">Category</span>
-          </div>
+      <div className="flex w-full">
+        {/* Sidebar */}
+        <div className="w-64 bg-white shadow-md border-r min-h-[calc(100vh-80px)] p-4">
+          {[
+            { key: "profile", icon: <FaUser />, label: "Profile" },
+            { key: "notifications", icon: <FaBell />, label: "Notifications" },
+            { key: "category", icon: <FaList />, label: "Category" },
+          ].map((tab) => (
+            <div
+              key={tab.key}
+              className={`flex items-center gap-3 p-3 mb-2 rounded cursor-pointer ${
+                activeTab === tab.key ? "bg-gray-100 border-l-4 border-blue-600" : "hover:bg-gray-50"
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.icon}
+              <span className="text-gray-700">{tab.label}</span>
+            </div>
+          ))}
         </div>
 
-        <div className="flex-1 p-6">
+        {/* Main Content */}
+        <div className="flex-1 p-6 space-y-6">
           {activeTab === "profile" && <ProfileSection />}
           {activeTab === "notifications" && <NotificationsSection />}
 
           {activeTab === "category" && (
-            <div className="bg-white p-6 rounded shadow border">
+            <div className="bg-white p-6 rounded shadow border w-full max-w-full">
               <h2 className="text-xl font-bold mb-4">Category Management</h2>
 
+              {/* Tabs */}
               <div className="flex space-x-6 mb-4 border-b pb-2">
                 <button
                   onClick={() => setActiveSection("income")}
@@ -286,54 +268,33 @@ export default function Category() {
                 </button>
               </div>
 
+              {/* Category List */}
               <div className="space-y-2">
-                {activeSection === "income" &&
-                  incomeCategories.map((cat, i) => (
-                    <div
-                      key={i}
-                      className="flex justify-between items-center bg-gray-50 p-2 rounded border"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <span className={`w-3 h-3 rounded-full ${cat.color}`}></span>
-                        <span>{cat.name}</span>
-                      </div>
-                      <div className="space-x-2">
-                        <button onClick={() => handleEditClick(cat, i, "income")}>
-                          <FaEdit className="text-black cursor-pointer" />
-                        </button>
-                        <button
-                          onClick={() => setIncomeCategories(incomeCategories.filter((_, idx) => idx !== i))}
-                        >
-                          <FaTimes className="text-black cursor-pointer" />
-                        </button>
-                      </div>
+                {(activeSection === "income" ? incomeCategories : expenseCategories).map((cat, i) => (
+                  <div key={i} className="flex justify-between items-center bg-gray-50 p-2 rounded border">
+                    <div className="flex items-center space-x-2">
+                      <span className={`w-3 h-3 rounded-full ${cat.color}`}></span>
+                      <span>{cat.name}</span>
                     </div>
-                  ))}
-
-                {activeSection === "expenses" &&
-                  expenseCategories.map((cat, i) => (
-                    <div
-                      key={i}
-                      className="flex justify-between items-center bg-gray-50 p-2 rounded border"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <span className={`w-3 h-3 rounded-full ${cat.color}`}></span>
-                        <span>{cat.name}</span>
-                      </div>
-                      <div className="space-x-2">
-                        <button onClick={() => handleEditClick(cat, i, "expenses")}>
-                          <FaEdit className="text-black cursor-pointer" />
-                        </button>
-                        <button
-                          onClick={() => setExpenseCategories(expenseCategories.filter((_, idx) => idx !== i))}
-                        >
-                          <FaTimes className="text-black cursor-pointer" />
-                        </button>
-                      </div>
+                    <div className="space-x-2">
+                      <button onClick={() => handleEditClick(cat, i, activeSection)}>
+                        <FaEdit className="text-black cursor-pointer" />
+                      </button>
+                      <button
+                        onClick={() =>
+                          activeSection === "income"
+                            ? setIncomeCategories(incomeCategories.filter((_, idx) => idx !== i))
+                            : setExpenseCategories(expenseCategories.filter((_, idx) => idx !== i))
+                        }
+                      >
+                        <FaTimes className="text-black cursor-pointer" />
+                      </button>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
 
+              {/* Add Button */}
               <div className="mt-6">
                 <button
                   onClick={handleAddClick}
@@ -347,8 +308,9 @@ export default function Category() {
         </div>
       </div>
 
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white rounded shadow-lg p-6 w-96">
             <h3 className="text-lg font-bold mb-4">
               {editIndex !== null ? "Edit Category" : "Add New Category"}
