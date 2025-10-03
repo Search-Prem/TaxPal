@@ -6,7 +6,9 @@ import authRoutes from "./routes/authRoutes.js";
 import transactionsRouter from "./routes/TransRoute.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import taxRoutes from "./routes/taxRoutes.js";
-import taxPaymentRoutes from "./routes/taxPaymentRoutes.js";  // ✅ new
+import taxPaymentRoutes from "./routes/taxPaymentRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";  // ✅ new
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -20,6 +22,8 @@ app.use("/taxRoutes", taxRoutes);
 app.use("/auth", authRoutes);
 app.use("/budgets", budgetRoutes);
 app.use("/api/taxpayment", taxPaymentRoutes); // ✅ new
+app.use("/api/reports", reportRoutes); 
+app.use("/api/user", userRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {

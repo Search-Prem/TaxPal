@@ -5,7 +5,14 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   country: { type: String, required: true },
-  income:{ type: String, required: true }
+  income:{ type: String, required: true },
+  // Notification preferences
+  notifications: {
+    email: { type: Boolean, default: true },
+    sms: { type: Boolean, default: false },
+    push: { type: Boolean, default: true }
+  }
+
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

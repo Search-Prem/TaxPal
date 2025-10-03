@@ -5,7 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const ExpenseChart = ({ transactions }) => {
-  // Only take expenses
+  // Only expenses
   const expenses = transactions.filter((t) => t.type === "Expense");
 
   // Group by category
@@ -14,16 +14,30 @@ const ExpenseChart = ({ transactions }) => {
     return acc;
   }, {});
 
+  const categories = Object.keys(dataByCategory);
+  const amounts = Object.values(dataByCategory);
+  const total = amounts.reduce((a, b) => a + b, 0);
+
+  // Calculate percentages
+  const percentages = amounts.map((amt) =>
+    ((amt / total) * 100).toFixed(0) // round to whole %
+  );
+
+  const colors = [
+    "#36A2EB", // Rent/Mortgage
+    "#4BC0C0", // Business
+    "#FFCD56", // Utilities
+    "#FF6384", // Food
+    "#9966FF", // Other
+  ];
+
   const data = {
-    labels: Object.keys(dataByCategory),
+    labels: categories,
     datasets: [
       {
         label: "Expenses",
-        data: Object.values(dataByCategory),
-        backgroundColor: [
-          "#36A2EB", "#6C63FF", "#FF6384", "#FF9F40", "#FFCD56",
-          "#4BC0C0", "#9966FF", "#C9CBCF"
-        ],
+        data: amounts,
+        backgroundColor: colors,
         borderColor: "#ffffff",
         borderWidth: 4,
         hoverOffset: 4,
@@ -32,8 +46,39 @@ const ExpenseChart = ({ transactions }) => {
   };
 
   return (
-    <div className="relative h-64 w-full flex items-center justify-center">
-      <Doughnut data={data} options={{ responsive: true, maintainAspectRatio: false, cutout: "75%" }} />
+    <div className="flex flex-col items-center">
+      <div className="h-64 w-64">
+        <Doughnut
+          data={data}
+          options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "70%", // donut thickness
+            plugins: {
+              legend: { display: false }, // hide default legend
+            },
+          }}
+        />
+      </div>
+
+      {/* Custom Legend */}
+      <div className="mt-4 w-full">
+        {categories.map((cat, i) => (
+          <div
+            key={cat}
+            className="flex justify-between items-center mb-2 text-sm"
+          >
+            <div className="flex items-center space-x-2">
+              <span
+                className="inline-block w-3 h-3 rounded-full"
+                style={{ backgroundColor: colors[i % colors.length] }}
+              ></span>
+              <span>{cat}</span>
+            </div>
+            <span className="font-semibold">{percentages[i]}%</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

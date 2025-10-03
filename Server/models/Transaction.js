@@ -5,7 +5,7 @@ const transactionSchema = new mongoose.Schema({
   type: { type: String, enum: ["Income", "Expense"], required: true },
   category: { type: String, required: true },
   amount: { type: Number, required: true },
-  date: { type: String, required: true }, // store only YYYY-MM-DD
+  date: { type: Date, required: true }, // ✅ Proper Date type
   description: { type: String },
 });
 

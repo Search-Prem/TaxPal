@@ -29,7 +29,7 @@ router.post("/", authMiddleware, async (req, res) => {
       type,
       category,
       amount,
-      date: dateOnly,
+      date: new Date(date),
       description
     });
 
@@ -54,5 +54,40 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to delete transaction" });
   }
 });
+// ✅ Update transaction
+router.put("/:id", authMiddleware, async (req, res) => {
+  try {
+    const { type, category, amount, date, description } = req.body;
+
+    // Optional: validate date (cannot be in future)
+    if (date && new Date(date) > new Date()) {
+      return res.status(400).json({ error: "Date cannot be in the future" });
+    }
+
+    const updatedTransaction = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, user_id: req.user.id },
+      {
+        $set: {
+          type,
+          category,
+          amount,
+          date: new Date(date),
+          description,
+        },
+      },
+      { new: true } // return updated document
+    );
+
+    if (!updatedTransaction) {
+      return res.status(404).json({ error: "Transaction not found" });
+    }
+
+    res.json(updatedTransaction);
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ error: "Failed to update transaction" });
+  }
+});
+
 
 export default router;

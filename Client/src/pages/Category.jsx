@@ -1,35 +1,113 @@
 import { useState, useEffect } from "react";
 import { FaUser, FaBell, FaList, FaEdit, FaTimes, FaEye, FaEyeSlash } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { User, Mail, Globe, DollarSign } from "lucide-react";
 
 // ---------------- Profile Section ----------------
 function ProfileSection() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    country: "",
+    income: ""
+  });
+  const [loading, setLoading] = useState(true);
 
+  const token = localStorage.getItem("token"); // ✅ Get JWT from storage
+
+  // ✅ Fetch profile from backend
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("profileSettings"));
-    if (saved) {
-      setForm({ name: saved.name || "", email: saved.email || "", password: "" });
-    }
-  }, []);
+    const fetchProfile = async () => {
+      if (!token) {
+        toast.error("No token found. Please login again.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch("http://localhost:5001/api/user/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ send JWT
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setForm({
+            name: data.name || "",
+            email: data.email || "",
+            country: data.country || "",
+            income: data.income || "",
+          });
+        } else {
+          toast.error(data.message || "Failed to load profile");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Error fetching profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [token]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSave = () => {
-    const toSave = { name: form.name, email: form.email };
-    localStorage.setItem("profileSettings", JSON.stringify(toSave));
-    toast.success("Profile saved!");
+  // ✅ Save profile to backend
+  const handleSave = async () => {
+    if (!token) {
+      toast.error("No token found. Please login again.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5001/api/user/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ send JWT
+        },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Profile updated!");
+      } else {
+        toast.error(data.message || "Failed to update");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating profile");
+    }
   };
 
-  return (
-    <div className="bg-white p-6 rounded shadow border w-full max-w-full">
-      <h2 className="text-xl font-bold mb-2">Profile Settings</h2>
-      <p className="text-gray-600 mb-4">Update your personal information.</p>
+  if (loading) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md border w-full max-w-lg">
+        <p className="text-gray-500">Loading profile...</p>
+      </div>
+    );
+  }
 
-      <div className="space-y-4">
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md border w-full max-auto">
+      {/* Avatar */}
+      <div className="flex flex-col items-center mb-10">
+        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl mb-2">
+          {form.name ? form.name.charAt(0).toUpperCase() : "U"}
+        </div>
+        <h2 className="text-xl font-bold">{form.name || "Your Name"}</h2>
+        <p className="text-gray-600 text-sm">{form.email}</p>
+      </div>
+
+
+      {/* Details Form */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
+          <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+            <User size={16} /> Name
+          </label>
           <input
             type="text"
             name="name"
@@ -40,7 +118,9 @@ function ProfileSection() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Email (readonly)</label>
+          <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+            <Mail size={16} /> Email
+          </label>
           <input
             type="email"
             name="email"
@@ -50,34 +130,43 @@ function ProfileSection() {
           />
         </div>
 
-        <div className="relative">
-          <label className="block text-sm font-medium mb-1">Password</label>
+        <div>
+          <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+            <Globe size={16} /> Country
+          </label>
           <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={form.password}
+            type="text"
+            name="country"
+            value={form.country}
             onChange={handleChange}
-            placeholder="Enter new password"
-            className="w-full border rounded px-3 py-2 pr-10"
+            className="w-full border rounded px-3 py-2"
           />
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            tabIndex={-1}
-          >
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </button>
         </div>
+
+         <div>
+          <label className="block text-sm font-medium mb-1 flex items-center gap-1">
+            <DollarSign size={16} /> Income
+          </label>
+          <input
+            type="text"
+            name="income"
+            value={form.income}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+        
       </div>
 
-      <button
-        onClick={handleSave}
-        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
-        Save Profile
-      </button>
+      {/* Save button */}
+      <div className="mt-6 text-left">
+        <button
+          onClick={handleSave}
+          className="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Save Changes
+        </button>
+      </div>
     </div>
   );
 }
@@ -85,17 +174,58 @@ function ProfileSection() {
 // ---------------- Notifications Section ----------------
 function NotificationsSection() {
   const [prefs, setPrefs] = useState({ email: true, sms: false, push: true });
+  const token = localStorage.getItem("token");
 
+  // ✅ Fetch notifications from backend
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("notificationSettings"));
-    if (saved) setPrefs(saved);
-  }, []);
+    const fetchNotifications = async () => {
+      if (!token) return;
+
+      try {
+        const res = await fetch("http://localhost:5001/api/user/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+        if (res.ok && data.notifications) {
+          setPrefs(data.notifications);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load notifications");
+      }
+    };
+
+    fetchNotifications();
+  }, [token]);
 
   const toggle = (key) => setPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const handleSave = () => {
-    localStorage.setItem("notificationSettings", JSON.stringify(prefs));
-    toast.success("Notification settings saved!");
+  // ✅ Save updated notifications
+  const handleSave = async () => {
+    if (!token) return;
+
+    try {
+      const res = await fetch("http://localhost:5001/api/user/notifications", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(prefs),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Notification settings saved!");
+        console.log("Updated:", data);
+      } else {
+        toast.error(data.message || "Failed to save notifications");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to save notifications");
+    }
   };
 
   return (
@@ -106,15 +236,27 @@ function NotificationsSection() {
       <div className="space-y-4">
         <label className="flex items-center justify-between">
           <span>Email notifications</span>
-          <input type="checkbox" checked={prefs.email} onChange={() => toggle("email")} />
+          <input
+            type="checkbox"
+            checked={prefs.email}
+            onChange={() => toggle("email")}
+          />
         </label>
         <label className="flex items-center justify-between">
           <span>SMS notifications</span>
-          <input type="checkbox" checked={prefs.sms} onChange={() => toggle("sms")} />
+          <input
+            type="checkbox"
+            checked={prefs.sms}
+            onChange={() => toggle("sms")}
+          />
         </label>
         <label className="flex items-center justify-between">
           <span>Push notifications</span>
-          <input type="checkbox" checked={prefs.push} onChange={() => toggle("push")} />
+          <input
+            type="checkbox"
+            checked={prefs.push}
+            onChange={() => toggle("push")}
+          />
         </label>
       </div>
 
@@ -209,6 +351,16 @@ export default function Category() {
     setEditType(null);
     setShowModal(false);
   };
+  const token = localStorage.getItem("token");
+  let userId = null;
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      userId = payload.id;
+    } catch (e) {
+      console.error("Invalid token");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 w-full">
@@ -242,7 +394,7 @@ export default function Category() {
         {/* Main Content */}
         <div className="flex-1 p-6 space-y-6">
           {activeTab === "profile" && <ProfileSection />}
-          {activeTab === "notifications" && <NotificationsSection />}
+          {activeTab === "notifications" && <NotificationsSection userId={userId} />}
 
           {activeTab === "category" && (
             <div className="bg-white p-6 rounded shadow border w-full max-w-full">

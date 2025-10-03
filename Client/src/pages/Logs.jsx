@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
+import { toast } from "react-toastify";
 
 // SVG Icons
 const EditIcon = () => (
@@ -203,6 +204,7 @@ export default function App() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(editTransaction),
       });
+      toast.success("Successfully updated the details");
       setEditTransaction(null);
       fetchTransactions();
     } catch {
