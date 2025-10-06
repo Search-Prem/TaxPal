@@ -28,7 +28,7 @@ export default function App() {
     !!localStorage.getItem("token")
   );
 
-  // Modal state and form state
+  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("income");
   const [categories, setCategories] = useState([
@@ -68,6 +68,7 @@ export default function App() {
     setShowModal(true);
   };
 
+  // ---- Transaction Modal ----
   const TransactionModal = () => {
     const [form, setForm] = useState({
       date: "",
@@ -84,7 +85,7 @@ export default function App() {
     };
 
     const handleCategoryChange = (e) => {
-      if (e.target.value === "__new__") {
+      if (e.target.value === "_new_") {
         setCategoryMode("new");
         setForm({ ...form, category: "" });
       } else {
@@ -121,20 +122,21 @@ export default function App() {
         setForm({ date: "", description: "", category: "", amount: "", notes: "" });
         setCategoryMode("select");
         setNewCategory("");
-        // You can add post submit refresh logic if needed
       } catch (err) {
         alert("Failed to add transaction");
       }
     };
 
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-30">
+      <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black bg-opacity-30">
         <div className="min-h-screen flex items-center justify-center py-12 px-4">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 max-h-[calc(100vh-6rem)] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-lg font-semibold">
-                  {modalType === "income" ? "Record New Income" : "Record New Expense"}
+                  {modalType === "income"
+                    ? "Record New Income"
+                    : "Record New Expense"}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
                   Add details about your {modalType} to track your finances better.
@@ -149,7 +151,6 @@ export default function App() {
                 ✕
               </button>
             </div>
-
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               <label className="text-sm font-medium text-gray-700">
                 Description
@@ -194,7 +195,7 @@ export default function App() {
                           {cat}
                         </option>
                       ))}
-                      <option value="__new__">Add new category</option>
+                      <option value="_new_">Add new category</option>
                     </select>
                   ) : (
                     <input
@@ -217,7 +218,7 @@ export default function App() {
                     value={form.date}
                     onChange={handleChange}
                     required
-                    max={new Date().toISOString().split("T")[0]} // disallow future dates
+                    max={new Date().toISOString().split("T")[0]}
                     className="mt-1 border px-3 py-2 rounded w-full"
                   />
                 </label>
@@ -257,7 +258,7 @@ export default function App() {
     );
   };
 
-  // PrivateLayout with modal control props passed to Sidebar
+  // ---- Private Layout ----
   const PrivateLayout = ({ children }) => (
     <div className="flex min-h-screen bg-gray-100 pt-16">
       <Sidebar
@@ -268,7 +269,6 @@ export default function App() {
         refreshTransactions={() => {}}
       />
       <main className="flex-1 ml-56 p-6">{children}</main>
-      {showModal && <TransactionModal />}
     </div>
   );
 
@@ -390,6 +390,9 @@ export default function App() {
           element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />}
         />
       </Routes>
+
+      {/* 🔥 Modal rendered globally — works on all pages */}
+      {showModal && <TransactionModal />}
 
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

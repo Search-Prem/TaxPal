@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
 import { toast } from "react-toastify";
 
 // SVG Icons
@@ -15,7 +14,6 @@ const DeleteIcon = () => (
   </svg>
 );
 
-// ================= Transaction Overview =================
 const TransactionOverview = ({
   categories,
   filterDate,
@@ -29,24 +27,22 @@ const TransactionOverview = ({
   <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
     <h2 className="text-xl font-semibold text-gray-800 mb-4">Transaction Overview</h2>
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-      {/* Date Range Input */}
       <div>
         <label htmlFor="dateRange" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
         <input
           type="date"
           id="dateRange"
           value={filterDate}
-          onChange={e => setFilterDate(e.target.value)}
+          onChange={(e) => setFilterDate(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
-      {/* Category Select */}
       <div>
         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
         <select
           id="category"
           value={filterCategory}
-          onChange={e => setFilterCategory(e.target.value)}
+          onChange={(e) => setFilterCategory(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           <option>All categories</option>
@@ -55,13 +51,12 @@ const TransactionOverview = ({
           ))}
         </select>
       </div>
-      {/* Type Select */}
       <div>
         <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Type</label>
         <select
           id="type"
           value={filterType}
-          onChange={e => setFilterType(e.target.value)}
+          onChange={(e) => setFilterType(e.target.value)}
           className="w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
           <option>All</option>
@@ -69,7 +64,6 @@ const TransactionOverview = ({
           <option>Expense</option>
         </select>
       </div>
-      {/* Filters Button */}
       <button
         className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
         onClick={onApplyFilters}
@@ -80,7 +74,6 @@ const TransactionOverview = ({
   </div>
 );
 
-// ================= Recent Transactions =================
 const RecentTransactionsTable = ({ transactions, onDelete, onEdit }) => {
   const formatCurrency = (amount) => {
     const isNegative = amount < 0;
@@ -101,66 +94,60 @@ const RecentTransactionsTable = ({ transactions, onDelete, onEdit }) => {
       <div className="overflow-x-auto">
         <table className="w-full min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
-  <tr>
-    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-  </tr>
-</thead>
-
-<tbody className="bg-white divide-y divide-gray-200">
-  {Array.isArray(transactions) && transactions.length > 0 ? (
-    transactions.map((transaction) => (
-      <tr key={transaction._id} className="hover:bg-gray-50">
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.date}</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.description}</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.type}</td> {/* 👈 Added Type */}
-        <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.type==="Expense" ? "text-red-600" : "text-green-600"}`}>
-          {formatCurrency(transaction.amount)}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
-          <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onEdit(transaction)}>
-            <EditIcon />
-          </button>
-          <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onDelete(transaction)}>
-            <DeleteIcon />
-          </button>
-        </td>
-      </tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="6" className="text-center text-gray-500 py-4">
-        No transactions found
-      </td>
-    </tr>
-  )}
-</tbody>
-
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {Array.isArray(transactions) && transactions.length > 0 ? (
+              transactions.map((transaction) => (
+                <tr key={transaction._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{transaction.description}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.type}</td>
+                  <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${transaction.type === "Expense" ? "text-red-600" : "text-green-600"}`}>
+                    {formatCurrency(transaction.amount)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
+                    <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onEdit(transaction)}>
+                      <EditIcon />
+                    </button>
+                    <button className="p-1 rounded-full hover:bg-gray-200" onClick={() => onDelete(transaction)}>
+                      <DeleteIcon />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="text-center text-gray-500 py-4">
+                  No transactions found
+                </td>
+              </tr>
+            )}
+          </tbody>
         </table>
       </div>
     </div>
   );
 };
 
-// ================= Main App =================
-export default function App() {
+export default function Logs() {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filterDate, setFilterDate] = useState("");
   const [filterCategory, setFilterCategory] = useState("All categories");
   const [filterType, setFilterType] = useState("All");
   const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [editTransaction, setEditTransaction] = useState(null);
 
-  // Modal states
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // transaction to delete
-  const [editTransaction, setEditTransaction] = useState(null); // transaction to edit
-
-  // Fetch transactions
   const fetchTransactions = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -179,7 +166,6 @@ export default function App() {
     }
   };
 
-  // Confirm Delete
   const confirmDelete = async () => {
     if (!deleteConfirm) return;
     try {
@@ -195,7 +181,6 @@ export default function App() {
     }
   };
 
-  // Save Edit
   const saveEdit = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -212,14 +197,11 @@ export default function App() {
     }
   };
 
-  // Filtering logic
   const handleApplyFilters = () => {
     let filtered = transactions;
     if (filterDate) filtered = filtered.filter((t) => t.date === filterDate);
     if (filterCategory !== "All categories") filtered = filtered.filter((t) => t.category === filterCategory);
-    if (filterType !== "All") {
-    filtered = filtered.filter((t) => t.type === filterType);
-  }
+    if (filterType !== "All") filtered = filtered.filter((t) => t.type === filterType);
     setFilteredTransactions(filtered);
   };
 
@@ -228,28 +210,26 @@ export default function App() {
   }, []);
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
-      <Sidebar categories={categories} refreshTransactions={fetchTransactions} />
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Income & Expense Log</h1>
-        <TransactionOverview
-          categories={categories}
-          filterDate={filterDate}
-          setFilterDate={setFilterDate}
-          filterCategory={filterCategory}
-          setFilterCategory={setFilterCategory}
-          filterType={filterType}
-          setFilterType={setFilterType}
-          onApplyFilters={handleApplyFilters}
-        />
-        <RecentTransactionsTable
-          transactions={filteredTransactions}
-          onDelete={(t) => setDeleteConfirm(t)}
-          onEdit={(t) => setEditTransaction(t)}
-        />
-      </main>
+    <main className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Income & Expense Log</h1>
 
-      {/* Delete Confirmation Modal */}
+      <TransactionOverview
+        categories={categories}
+        filterDate={filterDate}
+        setFilterDate={setFilterDate}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterType={filterType}
+        setFilterType={setFilterType}
+        onApplyFilters={handleApplyFilters}
+      />
+
+      <RecentTransactionsTable
+        transactions={filteredTransactions}
+        onDelete={(t) => setDeleteConfirm(t)}
+        onEdit={(t) => setEditTransaction(t)}
+      />
+
       {deleteConfirm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
@@ -263,7 +243,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Edit Transaction Modal */}
       {editTransaction && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -285,6 +264,6 @@ export default function App() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 }

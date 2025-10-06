@@ -10,7 +10,6 @@ import {
 
 export default function Sidebar({
   categories,
-  refreshTransactions,
   openAddIncomeModal,
   openAddExpenseModal,
   onAuthError,
