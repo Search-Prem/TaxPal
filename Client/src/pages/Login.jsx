@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
@@ -13,7 +13,7 @@ export default function Login({ setIsAuthenticated }) {
     e.preventDefault();
     setError("");
     try {
-      const res = await fetch("http://localhost:5001/auth/login", {
+      const res = await fetch("https://taxpal-sj9u.onrender.com/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -112,3 +112,4 @@ export default function Login({ setIsAuthenticated }) {
     </main>
   );
 }
+

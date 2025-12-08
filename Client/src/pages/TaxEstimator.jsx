@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { FaUniversity, FaReceipt, FaTimes } from "react-icons/fa";
 import { FiPercent } from "react-icons/fi";
 import { BsFillFileEarmarkTextFill } from "react-icons/bs";
@@ -75,7 +75,7 @@ export default function TaxEstimator() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:5001/taxRoutes", {
+      const res = await fetch("https://taxpal-sj9u.onrender.com/taxRoutes", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch records");
@@ -107,8 +107,8 @@ export default function TaxEstimator() {
       };
 
       const url = update && existingRecord?._id
-        ? `http://localhost:5001/taxRoutes/${existingRecord._id}`
-        : "http://localhost:5001/taxRoutes";
+        ? `https://taxpal-sj9u.onrender.com/taxRoutes/${existingRecord._id}`
+        : "https://taxpal-sj9u.onrender.com/taxRoutes";
       const method = update ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -332,3 +332,4 @@ function SummaryCard({ icon, title, value, subtitle }) {
     </div>
   );
 }
+

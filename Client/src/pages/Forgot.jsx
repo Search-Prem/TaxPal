@@ -1,4 +1,4 @@
-// src/pages/Forgot.jsx
+﻿// src/pages/Forgot.jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,7 +12,7 @@ export default function Forgot() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/auth/forgot-password", {
+      const res = await fetch("https://taxpal-sj9u.onrender.com/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -70,3 +70,4 @@ export default function Forgot() {
     </div>
   );
 }
+

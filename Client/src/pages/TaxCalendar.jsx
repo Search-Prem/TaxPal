@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -13,7 +13,7 @@ export default function TaxCalendar() {
   // Fetch user tax payment record from backend
   const fetchPayment = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/taxPayment", {
+      const res = await fetch("https://taxpal-sj9u.onrender.com/api/taxPayment", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch");
@@ -135,7 +135,7 @@ export default function TaxCalendar() {
   const confirmPayment = async () => {
     try {
       await fetch(
-        `http://localhost:5001/api/taxPayment/${selectedQuarter}`,
+        `https://taxpal-sj9u.onrender.com/api/taxPayment/${selectedQuarter}`,
         {
           method: "PUT",
           headers: {
@@ -245,3 +245,4 @@ export default function TaxCalendar() {
     </div>
   );
 }
+

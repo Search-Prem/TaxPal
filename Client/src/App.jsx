@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -105,7 +105,7 @@ export default function App() {
       const token = localStorage.getItem("token");
 
       try {
-        await fetch("http://localhost:5001/transactions", {
+        await fetch("https://taxpal-sj9u.onrender.com/transactions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -398,3 +398,4 @@ export default function App() {
     </div>
   );
 }
+

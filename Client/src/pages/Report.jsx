@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { FileText, FileSpreadsheet, ClipboardList, X } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -23,7 +23,7 @@ export default function Report() {
     const token = localStorage.getItem("token");
 
     // Monthly
-    fetch("http://localhost:5001/api/reports/monthly", {
+    fetch("https://taxpal-sj9u.onrender.com/api/reports/monthly", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -34,7 +34,7 @@ export default function Report() {
       });
 
     // Quarterly
-    fetch("http://localhost:5001/api/reports/quarterly", {
+    fetch("https://taxpal-sj9u.onrender.com/api/reports/quarterly", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -303,3 +303,4 @@ export default function Report() {
     </div>
   );
 }
+

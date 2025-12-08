@@ -1,4 +1,4 @@
-// src/pages/Reset.jsx
+﻿// src/pages/Reset.jsx
 import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -25,7 +25,7 @@ export default function Reset() {
       );
 
     try {
-      const res = await fetch("http://localhost:5001/auth/reset-password", {
+      const res = await fetch("https://taxpal-sj9u.onrender.com/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, password: pw1 }),
@@ -134,3 +134,4 @@ export default function Reset() {
     </div>
   );
 }
+

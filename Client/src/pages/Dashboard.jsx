@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import StatCard from "../components/StatCard";
 import ExpenseChart from "../components/ExpenseChart";
 import FinancialTrendsChart from "../components/FinancialTrendsChart";
@@ -13,7 +13,7 @@ const Dashboard = () => {
     const fetchTransactions = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/transactions", {
+        const res = await fetch("https://taxpal-sj9u.onrender.com/transactions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -69,3 +69,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
