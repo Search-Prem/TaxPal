@@ -6,14 +6,53 @@ const taxPaymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      unique: true,
+      index: true,
     },
-    estimatedQuarterlyTaxes: { type: Number, required: true },
-    Q1: { type: Boolean, default: false }, // April – June
-    Q2: { type: Boolean, default: false }, // July – Sept
-    Q3: { type: Boolean, default: false }, // Oct – Dec
-    Q4: { type: Boolean, default: false }, // Jan – March
+
+    taxYear: {
+      type: String,
+      required: true,
+      default: "2026-27",
+    },
+
+    estimatedTax: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+
+    estimatedQuarterlyTaxes: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+
+    Q1: {
+      type: Boolean,
+      default: false,
+    },
+
+    Q2: {
+      type: Boolean,
+      default: false,
+    },
+
+    Q3: {
+      type: Boolean,
+      default: false,
+    },
+
+    Q4: {
+      type: Boolean,
+      default: false,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 export default mongoose.model("TaxPayment", taxPaymentSchema);
