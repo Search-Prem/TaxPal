@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://taxpal-sj9u.onrender.com/:path*"
+      "destination": "https://taxpal-sj9u.onrender.com/api/:path*"
     }
   ]
 }
