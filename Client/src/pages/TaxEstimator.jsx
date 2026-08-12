@@ -44,7 +44,7 @@ export default function TaxEstimator() {
 
     try {
       const res = await fetch(
-        "https://taxpal-sj9u.onrender.com/taxRoutes",
+        "/api/taxRoutes",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -175,8 +175,8 @@ export default function TaxEstimator() {
 
       const url =
         update && existingRecord?._id
-          ? `https://taxpal-sj9u.onrender.com/taxRoutes/${existingRecord._id}`
-          : "https://taxpal-sj9u.onrender.com/taxRoutes";
+          ? `/api/taxRoutes/${existingRecord._id}`
+          : "/api/taxRoutes";
 
       const method = update ? "PUT" : "POST";
 

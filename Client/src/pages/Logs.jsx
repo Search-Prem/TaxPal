@@ -152,7 +152,7 @@ export default function Logs() {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const response = await fetch("https://taxpal-sj9u.onrender.com/transactions", {
+      const response = await fetch("/api/transactions", {
         method: "GET",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
@@ -170,7 +170,7 @@ export default function Logs() {
     if (!deleteConfirm) return;
     try {
       const token = localStorage.getItem("token");
-      await fetch(`https://taxpal-sj9u.onrender.com/transactions/${deleteConfirm._id}`, {
+      await fetch(`/api/transactions/${deleteConfirm._id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
@@ -184,7 +184,7 @@ export default function Logs() {
   const saveEdit = async () => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`https://taxpal-sj9u.onrender.com/transactions/${editTransaction._id}`, {
+      await fetch(`/api/transactions/${editTransaction._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(editTransaction),

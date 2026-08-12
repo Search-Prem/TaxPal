@@ -26,10 +26,11 @@ app.use(express.json());
 connectDB();
 
 // Routes
-app.use("/transactions", transactionRoutes);
-app.use("/taxRoutes", taxRoutes);
-app.use("/auth", authRoutes);
-app.use("/budgets", budgetRoutes);
+// Routes
+app.use("/api/transactions", transactionRoutes);
+app.use("/api/taxRoutes", taxRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/budgets", budgetRoutes);
 app.use("/api/taxpayment", taxPaymentRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/user", userRoutes);

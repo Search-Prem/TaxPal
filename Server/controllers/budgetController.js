@@ -11,11 +11,22 @@ export const createBudget = async (req, res) => {
       description,
     } = req.body;
 
+    if (
+      !category ||
+      budgetAmount === undefined ||
+      !month
+    ) {
+      return res.status(400).json({
+        error:
+          "Category, budget amount and month are required",
+      });
+    }
+
     const budget = new Budget({
       user_id: req.user.id,
-      category,
-      budgetAmount,
-      month,
+      category: category.trim(),
+      budgetAmount: Number(budgetAmount),
+      month: month.trim(),
       description,
     });
 
@@ -23,7 +34,10 @@ export const createBudget = async (req, res) => {
 
     res.status(201).json(budget);
   } catch (err) {
-    console.error("Budget create error:", err);
+    console.error(
+      "Budget create error:",
+      err
+    );
 
     res.status(500).json({
       error: err.message,
@@ -36,11 +50,16 @@ export const getBudgets = async (req, res) => {
   try {
     const budgets = await Budget.find({
       user_id: req.user.id,
+    }).sort({
+      createdAt: -1,
     });
 
     res.json(budgets);
   } catch (err) {
-    console.error("Budget fetch error:", err);
+    console.error(
+      "Budget fetch error:",
+      err
+    );
 
     res.status(500).json({
       error: err.message,
@@ -49,19 +68,45 @@ export const getBudgets = async (req, res) => {
 };
 
 // Update budget
-export const updateBudget = async (req, res) => {
+export const updateBudget = async (
+  req,
+  res
+) => {
   try {
-    const updatedBudget = await Budget.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        user_id: req.user.id,
-      },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const update = {
+      ...req.body,
+    };
+
+    if (update.category) {
+      update.category =
+        update.category.trim();
+    }
+
+    if (update.month) {
+      update.month =
+        update.month.trim();
+    }
+
+    if (
+      update.budgetAmount !== undefined
+    ) {
+      update.budgetAmount = Number(
+        update.budgetAmount
+      );
+    }
+
+    const updatedBudget =
+      await Budget.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          user_id: req.user.id,
+        },
+        update,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
     if (!updatedBudget) {
       return res.status(404).json({
@@ -71,7 +116,10 @@ export const updateBudget = async (req, res) => {
 
     res.json(updatedBudget);
   } catch (err) {
-    console.error("Budget update error:", err);
+    console.error(
+      "Budget update error:",
+      err
+    );
 
     res.status(500).json({
       error: err.message,
@@ -80,12 +128,16 @@ export const updateBudget = async (req, res) => {
 };
 
 // Delete budget
-export const deleteBudget = async (req, res) => {
+export const deleteBudget = async (
+  req,
+  res
+) => {
   try {
-    const deletedBudget = await Budget.findOneAndDelete({
-      _id: req.params.id,
-      user_id: req.user.id,
-    });
+    const deletedBudget =
+      await Budget.findOneAndDelete({
+        _id: req.params.id,
+        user_id: req.user.id,
+      });
 
     if (!deletedBudget) {
       return res.status(404).json({
@@ -97,7 +149,10 @@ export const deleteBudget = async (req, res) => {
       message: "Budget deleted successfully",
     });
   } catch (err) {
-    console.error("Budget delete error:", err);
+    console.error(
+      "Budget delete error:",
+      err
+    );
 
     res.status(500).json({
       error: err.message,
@@ -106,7 +161,10 @@ export const deleteBudget = async (req, res) => {
 };
 
 // Check budget status
-export const checkBudgetStatus = async (req, res) => {
+export const checkBudgetStatus = async (
+  req,
+  res
+) => {
   try {
     const userId = req.user.id;
 
@@ -119,7 +177,6 @@ export const checkBudgetStatus = async (req, res) => {
     for (const budget of budgets) {
       /*
        * Budget month is stored as "YYYY-MM".
-       * Convert it into an actual date range:
        *
        * Example:
        * "2026-08"
@@ -128,9 +185,10 @@ export const checkBudgetStatus = async (req, res) => {
        * End:   2026-09-01
        */
 
-      const [year, month] = budget.month
-        .split("-")
-        .map(Number);
+      const [year, month] =
+        budget.month
+          .split("-")
+          .map(Number);
 
       if (
         !year ||
@@ -139,11 +197,14 @@ export const checkBudgetStatus = async (req, res) => {
         month > 12
       ) {
         results.push({
+          budgetId: budget._id,
           category: budget.category,
           month: budget.month,
-          budgetAmount: budget.budgetAmount,
+          budgetAmount:
+            budget.budgetAmount,
           totalExpense: 0,
-          remaining: budget.budgetAmount,
+          remaining:
+            budget.budgetAmount,
           status: "Invalid Budget Month",
         });
 
@@ -162,28 +223,33 @@ export const checkBudgetStatus = async (req, res) => {
         1
       );
 
-      const expenses = await Transaction.aggregate([
-        {
-          $match: {
-            user_id: budget.user_id,
-            category: budget.category,
-            type: "Expense",
+      const expenses =
+        await Transaction.aggregate([
+          {
+            $match: {
+              user_id: budget.user_id,
 
-            date: {
-              $gte: monthStart,
-              $lt: monthEnd,
+              category: budget.category,
+
+              type: "Expense",
+
+              date: {
+                $gte: monthStart,
+                $lt: monthEnd,
+              },
             },
           },
-        },
-        {
-          $group: {
-            _id: null,
-            total: {
-              $sum: "$amount",
+
+          {
+            $group: {
+              _id: null,
+
+              total: {
+                $sum: "$amount",
+              },
             },
           },
-        },
-      ]);
+        ]);
 
       const totalExpense =
         expenses.length > 0
@@ -191,17 +257,21 @@ export const checkBudgetStatus = async (req, res) => {
           : 0;
 
       const remaining =
-        budget.budgetAmount - totalExpense;
+        budget.budgetAmount -
+        totalExpense;
 
       const status =
-        totalExpense > budget.budgetAmount
+        totalExpense >
+        budget.budgetAmount
           ? "Exceeded"
           : "Within Budget";
 
       results.push({
+        budgetId: budget._id,
         category: budget.category,
         month: budget.month,
-        budgetAmount: budget.budgetAmount,
+        budgetAmount:
+          budget.budgetAmount,
         totalExpense,
         remaining,
         status,
@@ -210,7 +280,10 @@ export const checkBudgetStatus = async (req, res) => {
 
     res.json(results);
   } catch (err) {
-    console.error("Budget check error:", err);
+    console.error(
+      "Budget check error:",
+      err
+    );
 
     res.status(500).json({
       message: "Error checking budget",

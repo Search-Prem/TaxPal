@@ -11,8 +11,6 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
-  const [country, setCountry] = useState("");
-  const [income, setIncome] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -29,15 +27,13 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const res = await fetch("https://taxpal-sj9u.onrender.com/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: username,
           email,
           password,
-          country,
-          income,
         }),
       });
 
@@ -131,48 +127,6 @@ export default function Register() {
                 {showConfirmPass ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-          </div>
-
-          {/* Country */}
-          <div>
-            <label className="block text-sm mb-1">Select your country</label>
-            <select
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              required
-            >
-              <option value="">-- Choose --</option>
-              <option value="United States">United States</option>
-              <option value="India">India</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Canada">Canada</option>
-              <option value="Australia">Australia</option>
-              <option value="Germany">Germany</option>
-              <option value="France">France</option>
-              <option value="Japan">Japan</option>
-              <option value="Brazil">Brazil</option>
-              <option value="South Africa">South Africa</option>
-            </select>
-          </div>
-
-          {/* Income */}
-          <div>
-            <label className="block text-sm mb-1">Select income</label>
-            <select
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              value={income}
-              onChange={(e) => setIncome(e.target.value)}
-              required
-            >
-              <option value="">-- Choose --</option>
-              <option value="Below $25k">Below $25k</option>
-              <option value="$25k–$50k">$25k–$50k</option>
-              <option value="$50k–$75k">$50k–$75k</option>
-              <option value="$75k–$100k">$75k–$100k</option>
-              <option value="$100k–$150k">$100k–$150k</option>
-              <option value="Above $150k">Above $150k</option>
-            </select>
           </div>
 
           {/* Submit */}

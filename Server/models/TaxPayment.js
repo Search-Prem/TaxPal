@@ -6,7 +6,6 @@ const taxPaymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true,
       index: true,
     },
 
@@ -53,6 +52,12 @@ const taxPaymentSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
+);
+
+// One tax-payment record per user per financial year.
+taxPaymentSchema.index(
+  { userId: 1, taxYear: 1 },
+  { unique: true }
 );
 
 export default mongoose.model("TaxPayment", taxPaymentSchema);

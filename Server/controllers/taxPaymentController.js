@@ -1,113 +1,82 @@
 import TaxPayment from "../models/TaxPayment.js";
 
-// Create tax payment record
-export const createTaxPayment = async (req, res) => {
-  try {
-    const existing = await TaxPayment.findOne({
-      userId: req.user.id,
-    });
+const CURRENT_TAX_YEAR = "2026-27";
 
-    if (existing) {
-      return res.status(400).json({
-        message: "Tax payment record already exists",
-      });
-    }
-
-    const newPayment = new TaxPayment({
-      userId: req.user.id,
-      estimatedQuarterlyTaxes:
-        req.body.estimatedQuarterlyTaxes || 0,
-      Q1: false,
-      Q2: false,
-      Q3: false,
-      Q4: false,
-    });
-
-    await newPayment.save();
-
-    res.status(201).json(newPayment);
-  } catch (err) {
-    console.error("Create tax payment error:", err);
-
-    res.status(500).json({
-      message: "Server error",
-      error: err.message,
-    });
-  }
-};
-
-// Get logged-in user's tax payment record
+// Get the logged-in user's tax payment information
 export const getTaxPayment = async (req, res) => {
   try {
     const payment = await TaxPayment.findOne({
       userId: req.user.id,
+      taxYear: CURRENT_TAX_YEAR,
     });
 
     if (!payment) {
       return res.status(404).json({
-        message: "No record found",
+        message:
+          "No tax payment record found for the current tax year.",
       });
     }
 
     res.json(payment);
-  } catch (err) {
-    console.error("Get tax payment error:", err);
+  } catch (error) {
+    console.error("Tax payment fetch error:", error);
 
     res.status(500).json({
-      message: "Server error",
-      error: err.message,
+      message: "Unable to fetch tax payment information.",
     });
   }
 };
 
-// Update a specific quarter
-export const updateTaxPaymentQuarter = async (
-  req,
-  res
-) => {
+// Mark a specific quarterly installment as paid/unpaid
+export const updateTaxPayment = async (req, res) => {
   try {
     const { quarter } = req.params;
     const { paid } = req.body;
 
-    if (
-      !["Q1", "Q2", "Q3", "Q4"].includes(quarter)
-    ) {
+    if (!["Q1", "Q2", "Q3", "Q4"].includes(quarter)) {
       return res.status(400).json({
-        message: "Invalid quarter",
+        message: "Invalid tax installment.",
       });
     }
 
-    const payment =
-      await TaxPayment.findOneAndUpdate(
-        {
-          userId: req.user.id,
+    if (typeof paid !== "boolean") {
+      return res.status(400).json({
+        message: "Paid value must be true or false.",
+      });
+    }
+
+    const payment = await TaxPayment.findOneAndUpdate(
+      {
+        userId: req.user.id,
+        taxYear: CURRENT_TAX_YEAR,
+      },
+      {
+        $set: {
+          [quarter]: paid,
         },
-        {
-          $set: {
-            [quarter]: paid,
-          },
-        },
-        {
-          new: true,
-        }
-      );
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!payment) {
       return res.status(404).json({
-        message: "Record not found",
+        message:
+          "No tax payment record found for the current tax year. Calculate your tax first.",
       });
     }
 
-    res.json(payment);
-  } catch (err) {
-    console.error(
-      "Update tax payment error:",
-      err
-    );
+    res.json({
+      message: `${quarter} payment status updated successfully.`,
+      payment,
+    });
+  } catch (error) {
+    console.error("Tax payment update error:", error);
 
     res.status(500).json({
-      message: "Server error",
-      error: err.message,
+      message: "Unable to update tax payment.",
     });
   }
 };

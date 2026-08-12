@@ -25,7 +25,7 @@ export default function Reset() {
       );
 
     try {
-      const res = await fetch("https://taxpal-sj9u.onrender.com/auth/reset-password", {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, password: pw1 }),

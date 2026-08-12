@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import User from "../models/User.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Temporary OTP storage
 const otpStore = {};
@@ -15,12 +15,10 @@ export const register = async (req, res) => {
       name,
       email,
       password,
-      country,
-      income,
     } = req.body;
 
     // Basic validation
-    if (!name || !email || !password || !country || !income) {
+    if (!name || !email || !password) {
       return res.status(400).json({
         message: "All fields are required",
       });
@@ -43,8 +41,6 @@ export const register = async (req, res) => {
       name,
       email,
       password: hash,
-      country,
-      income,
     });
 
     await newUser.save();
